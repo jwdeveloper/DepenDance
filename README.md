@@ -22,7 +22,7 @@
 <div align="center" >
 
 
-<a target="blank" >
+<a href="https://jitpack.io/#jwdeveloper/DepenDance" target="blank" >
 
 <img src="https://jitpack.io/v/jwdeveloper/DepenDance.svg" width="20%" >
 </img>
@@ -30,7 +30,7 @@
 
 
 
-<a target="blank" >
+<a href="https://discord.gg/2hu6fPPeF7" target="blank" >
 
 <img src="https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white" >
 </img>
@@ -61,9 +61,9 @@
         </repository>
     </repositories>
     <dependency>
-        <groupid>com.github.jwdeveloper</groupid>
-        <artifactid>DepenDance</artifactid>
-        <version>0.0.2-Release</version>
+        <groupid>com.github.jwdeveloper.DepenDance</groupid>
+        <artifactid>DepenDance-Full</artifactid>
+        <version>0.0.3-Release</version>
     </dependency>     
 ```
 
