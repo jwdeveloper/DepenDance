@@ -13,8 +13,12 @@
 
 <div align="center" >
 
-<h1>Dependace</h1>
-Instantly generate production-ready Node.js backend apps 🚀
+<h1>DepenDance</h1>
+
+
+*💉 Inject Simplicity, Eject Complexity 🪲*
+
+
 <div align="center" >
 
 
