@@ -49,24 +49,28 @@
 </div>
 
 
-<div align="left" >
+<h1>Installation</h1>
 
 
-### content
+```xml
 
-[.1 Basic](https://github.com/jwdeveloper/DepenDance#Basic) 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+    <dependency>
+        <groupid>com.github.User</groupid>
+        <artifactid>Repo</artifactid>
+        <version>Tag</version>
+    </dependency>     
+```
 
-[.2 Object Instances](https://github.com/jwdeveloper/DepenDance#Object-Instances) 
+<h1>Examples</h1>
 
-[.3 Lists](https://github.com/jwdeveloper/DepenDance#Lists) 
 
-[.4 Events](https://github.com/jwdeveloper/DepenDance#Events) 
-
-[.5 Generic Types](https://github.com/jwdeveloper/DepenDance#Generic-Types) 
-
-[.6 AutoScan](https://github.com/jwdeveloper/DepenDance#AutoScan) </div>
-
-## Basic
+### Basic
 
 ```java
 public static void main(String[] args)
@@ -96,7 +100,7 @@ public static void main(String[] args)
     }
  
 ```
-## Object Instances
+### Object Instances
 
 ```java
 public static void main(String[] args)
@@ -123,7 +127,7 @@ public static void main(String[] args)
     }
  
 ```
-## Lists
+### Lists
 
 ```java
 public static void main(String[] args)
@@ -143,7 +147,7 @@ public static void main(String[] args)
     }
  
 ```
-## Events
+### Events
 
 ```java
 public static void main(String[] args)
@@ -184,7 +188,7 @@ public static void main(String[] args)
     }
  
 ```
-## Generic Types
+### Generic Types
 
 ```java
 public static void main(String[] args) {
@@ -232,7 +236,7 @@ public static void main(String[] args) {
 
  
 ```
-## AutoScan
+### AutoScan
 
 ```java
 public static void main(String[] args) {
