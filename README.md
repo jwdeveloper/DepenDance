@@ -22,15 +22,15 @@
 <div align="center" >
 
 
-<a href="https://jitpack.io/#jwdeveloper/DepenDance" target="blank" >
+<a target="blank" >
 
-<img src="https://jitpack.io/v/jwdeveloper/DepenDance.svg" width="20%" >
+<img src="https://jitpack.io/v/jwdeveloper/DepenDance.svg" width="11%" >
 </img>
 </a>
 
 
 
-<a href="https://discord.gg/2hu6fPPeF7" target="blank" >
+<a target="blank" >
 
 <img src="https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white" >
 </img>
@@ -61,68 +61,15 @@
         </repository>
     </repositories>
     <dependency>
-        <groupid>com.github.jwdeveloper.DepenDance</groupid>
-        <artifactid>DepenDance-Full</artifactid>
-        <version>[Replace with current version]</version>
+        <groupid>com.github.jwdeveloper</groupid>
+        <artifactid>DepenDance</artifactid>
+        <version>0.0.2-Release</version>
     </dependency>     
 ```
 
 <h1>Examples</h1>
 
 
-### Basic
-
-```java
-public static void main(String[] args)
-    {
-        /*
-           - Singleton There will be only one instance of object created by container
-           - Transient everytime `container.find` is used new instance of object is created
-         */
-
-        DependanceContainer container = Dependance.newContainer()
-                .registerTransient(Shop.class, LocalShop.class) //registration interface to class
-                .registerSingleton(Config.class)
-                .registerSingleton(ShopManager.class)
-                .build();
-
-
-        ShopManager shopManager1 = container.find(ShopManager.class);
-        ShopManager shopManager2 = container.find(ShopManager.class);
-
-        Assert.assertEquals(shopManager1, shopManager2);
-        Assert.assertEquals(shopManager1.getConfig(), shopManager2.getConfig());
-        Assert.assertNotEquals(shopManager1.getShop(), shopManager2.getShop());
-    }
- 
-```
-### Object Instances
-
-```java
-public static void main(String[] args)
-    {
-        Config myConfigInstance = new Config();
-        DependanceContainer container = Dependance.newContainer()
-                .registerSingleton(Config.class, myConfigInstance)
-                .registerTransient(LocalShop.class,(e)->
-                {
-                    var config = (Config)e.find(Config.class);
-                    var shop = new LocalShop(config);
-                    System.out.println("Shop has been created: "+shop);
-                    return shop;
-                })
-                .build();
-
-
-        Config config = container.find(Config.class);
-        LocalShop shop1 = container.find(LocalShop.class);
-        LocalShop shop2 = container.find(LocalShop.class);
-
-        Assert.assertEquals(myConfigInstance, config);
-        Assert.assertNotEquals(shop1, shop2);
-    }
- 
-```
 ### Lists
 
 ```java
@@ -230,6 +177,59 @@ public static void main(String[] args) {
     }
 
 
+ 
+```
+### Object Instances
+
+```java
+public static void main(String[] args)
+    {
+        Config myConfigInstance = new Config();
+        DependanceContainer container = Dependance.newContainer()
+                .registerSingleton(Config.class, myConfigInstance)
+                .registerTransient(LocalShop.class,(e)->
+                {
+                    var config = (Config)e.find(Config.class);
+                    var shop = new LocalShop(config);
+                    System.out.println("Shop has been created: "+shop);
+                    return shop;
+                })
+                .build();
+
+
+        Config config = container.find(Config.class);
+        LocalShop shop1 = container.find(LocalShop.class);
+        LocalShop shop2 = container.find(LocalShop.class);
+
+        Assert.assertEquals(myConfigInstance, config);
+        Assert.assertNotEquals(shop1, shop2);
+    }
+ 
+```
+### Basic
+
+```java
+public static void main(String[] args)
+    {
+        /*
+           - Singleton There will be only one instance of object created by container
+           - Transient everytime `container.find` is used new instance of object is created
+         */
+
+        DependanceContainer container = Dependance.newContainer()
+                .registerTransient(Shop.class, LocalShop.class) //registration interface to class
+                .registerSingleton(Config.class)
+                .registerSingleton(ShopManager.class)
+                .build();
+
+
+        ShopManager shopManager1 = container.find(ShopManager.class);
+        ShopManager shopManager2 = container.find(ShopManager.class);
+
+        Assert.assertEquals(shopManager1, shopManager2);
+        Assert.assertEquals(shopManager1.getConfig(), shopManager2.getConfig());
+        Assert.assertNotEquals(shopManager1.getShop(), shopManager2.getShop());
+    }
  
 ```
 ### AutoScan
