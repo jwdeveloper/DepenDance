@@ -11,9 +11,20 @@
 </div>
 
 
+
+<br>
+<br>
+
+
 <div align="center" >
 
 <h1>Dependace</h1>
+Instantly generate production-ready Node.js backend apps 🚀
+
+
+
+
+<div align="center" >
 
 
 <a target="blank" >
@@ -37,6 +48,8 @@
 <img src="https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white" >
 </img>
 </a>
+
+</div>
 
 </div>
 
