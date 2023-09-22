@@ -6,9 +6,9 @@ import lombok.Getter;
 public class ShopManager
 {
     private final Config config;
-    private final LocalShop shop;
+    private final Shop shop;
 
-    public ShopManager(Config config, LocalShop shop)
+    public ShopManager(Config config, Shop shop)
     {
         this.config = config;
         this.shop = shop;

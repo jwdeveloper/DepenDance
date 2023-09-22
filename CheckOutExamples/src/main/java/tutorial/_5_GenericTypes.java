@@ -3,7 +3,11 @@ package tutorial;
 import io.github.jwdeveloper.dependance.Dependance;
 import tutorial.models.*;
 
+
 public class _5_GenericTypes {
+
+
+
     public static void main(String[] args) {
 
         var shopRepository = new Repository<Shop>();
@@ -14,9 +18,9 @@ public class _5_GenericTypes {
                 .configure(configuration ->
                 {
                     /**
-                     * Unfortuantelly since java not allow to define class with generic parameter
+                     * Unfortunately since java not allow to define class with generic parameter
                      * like Repository<MyGenericType>.class
-                     * All cases with generic types must be handled manually in onInjection event
+                     * All cases with generic types (besides lists) must be handled manually in onInjection event
                      */
 
                     configuration.onInjection(injection ->

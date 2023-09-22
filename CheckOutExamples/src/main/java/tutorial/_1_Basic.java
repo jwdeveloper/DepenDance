@@ -16,9 +16,9 @@ public class _1_Basic {
          */
 
         var container = Dependance.newContainer()
-                .registerSingleton(Shop.class, ShopManager.class) //registration interface to class
+                .registerTransient(Shop.class, LocalShop.class) //registration interface to class
                 .registerSingleton(Config.class)
-                .registerTransient(LocalShop.class)
+                .registerSingleton(ShopManager.class)
 
                 //auto-register all classes with annotation @injection
                 // that are in same package as input

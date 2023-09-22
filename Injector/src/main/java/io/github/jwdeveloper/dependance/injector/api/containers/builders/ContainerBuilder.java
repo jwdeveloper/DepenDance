@@ -37,7 +37,6 @@ public interface ContainerBuilder<Builder extends ContainerBuilder<Builder>> {
     <T> Builder registerTransient(Class<T> _interface, Class<? extends T> implementation);
 
     Builder registerSingleton(Class<?> _interface, Object instance);
-    Builder registerTransient(Class<?> _interface, Object instance);
     Builder registerSingleton(Class<?> _interface, Function<Container, Object> provider);
 
     Builder registerTransient(Class<?> _interface, Function<Container, Object> provider);

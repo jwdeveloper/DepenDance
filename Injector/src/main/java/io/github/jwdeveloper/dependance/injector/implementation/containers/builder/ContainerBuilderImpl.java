@@ -5,35 +5,44 @@ import io.github.jwdeveloper.dependance.injector.api.containers.builders.Contain
 import io.github.jwdeveloper.dependance.injector.api.containers.builders.ContainerBuilderConfiguration;
 import io.github.jwdeveloper.dependance.injector.api.enums.LifeTime;
 import io.github.jwdeveloper.dependance.injector.api.enums.RegistrationType;
-import io.github.jwdeveloper.dependance.injector.implementation.containers.ContainerConfigurationImpl;
-
+import io.github.jwdeveloper.dependance.injector.api.exceptions.ContainerException;
 import io.github.jwdeveloper.dependance.injector.api.models.RegistrationInfo;
 import io.github.jwdeveloper.dependance.injector.api.search.ContainerSearch;
+import io.github.jwdeveloper.dependance.injector.implementation.containers.ContainerConfigurationImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.containers.DefaultContainer;
 import io.github.jwdeveloper.dependance.injector.implementation.events.EventHandlerImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.factory.InjectionInfoFactoryImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.provider.InstanceProviderImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.search.SearchAgentImpl;
+import lombok.extern.java.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
 public class ContainerBuilderImpl<Builder extends ContainerBuilder<Builder>> implements ContainerBuilder<Builder>, ContainerBuilderConfiguration {
     protected final ContainerConfigurationImpl config;
+    protected final Logger logger;
 
-    public ContainerBuilderImpl() {
+    public ContainerBuilderImpl(Logger logger) {
         config = new ContainerConfigurationImpl();
+        this.logger = logger;
     }
+
+    public ContainerBuilderImpl()
+    {
+        this(Logger.getLogger(DefaultContainer.class.getSimpleName()));
+    }
+
 
     public ContainerConfigurationImpl getConfiguration() {
         return config;
     }
 
 
-    public Builder register(RegistrationInfo registrationInfo)
-    {
+    public Builder register(RegistrationInfo registrationInfo) {
         config.addRegistration(registrationInfo);
         addRegisteredType(registrationInfo.implementation());
         return builder();
@@ -67,32 +76,24 @@ public class ContainerBuilderImpl<Builder extends ContainerBuilder<Builder>> imp
 
     @Override
     public <T> Builder registerList(Class<T> _interface, LifeTime lifeTime) {
-        config.addRegistration(new RegistrationInfo(
-                _interface,
-                null,
-                (x) ->
-                {
-                    var container = (ContainerSearch) x;
-                    var instances = container.findAllByInterface(_interface);
-                    return new ArrayList(instances);
-                },
-                lifeTime,
-                RegistrationType.List
-        ));
-        return builder();
+        return registerList(_interface, lifeTime, (x) ->
+        {
+            var container = (ContainerSearch) x;
+            var instances = container.findAllByInterface(_interface);
+            return new ArrayList(instances);
+        });
     }
 
 
     @Override
     public <T> Builder registerList(Class<T> _interface, LifeTime lifeTime, Function<Container, Object> provider) {
         config.addRegistration(new RegistrationInfo(
+                List.class,
                 _interface,
-                null,
                 provider,
                 lifeTime,
                 RegistrationType.List
         ));
-        addRegisteredType(_interface);
         return builder();
     }
 
@@ -120,10 +121,9 @@ public class ContainerBuilderImpl<Builder extends ContainerBuilder<Builder>> imp
         return builder();
     }
 
-    private void addRegisteredType(Class<?> type)
-    {
+    private void addRegisteredType(Class<?> type) {
         if (config.getRegisterdTypes().contains(type)) {
-            throw new RuntimeException("Type " + type.getSimpleName() + " has been already registered to container");
+            throw new ContainerException("Type " + type.getSimpleName() + " has been already registered to container");
         }
         config.getRegisterdTypes().add(type);
     }
@@ -145,12 +145,8 @@ public class ContainerBuilderImpl<Builder extends ContainerBuilder<Builder>> imp
         return register(implementation, LifeTime.TRANSIENT);
     }
 
-
     public Builder registerSingleton(Class<?> _interface, Object instance) {
-        return register(_interface, LifeTime.SINGLETON, (x) ->
-        {
-            return instance;
-        });
+        return register(_interface, LifeTime.SINGLETON, (x) ->   instance);
     }
 
     @Override
@@ -163,13 +159,6 @@ public class ContainerBuilderImpl<Builder extends ContainerBuilder<Builder>> imp
         return register(_interface, LifeTime.TRANSIENT, provider);
     }
 
-    public Builder registerTransient(Class<?> _interface, Object instance) {
-        return register(_interface, LifeTime.TRANSIENT, (x) ->
-        {
-            return instance;
-        });
-    }
-
     @Override
     public Builder configure(Consumer<ContainerConfigurationImpl> configuration) {
         configuration.accept(config);
@@ -180,7 +169,8 @@ public class ContainerBuilderImpl<Builder extends ContainerBuilder<Builder>> imp
         return (Builder) this;
     }
 
-    public Container build() {
+    public Container build()
+    {
         var eventHandler = new EventHandlerImpl(config.getEvents());
         var instanceProvider = new InstanceProviderImpl();
         var injectionInfoFactory = new InjectionInfoFactoryImpl();
@@ -190,7 +180,7 @@ public class ContainerBuilderImpl<Builder extends ContainerBuilder<Builder>> imp
                 searchAgent,
                 instanceProvider,
                 eventHandler,
-                Logger.getLogger(DefaultContainer.class.getSimpleName()),
+                logger,
                 injectionInfoFactory,
                 config.getRegistrations());
     }
