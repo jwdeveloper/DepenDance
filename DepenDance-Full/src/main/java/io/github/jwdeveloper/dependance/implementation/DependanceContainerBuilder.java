@@ -25,7 +25,7 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
         super();
         this.decoratorBuilder = new DecoratorBuilderImpl(new InjectionInfoFactoryImpl(), new HashMap<>());
         classesToInitialize = new ArrayList<>();
-        dependanceContainerConfiguration = new DependanceContainerConfigurationImpl(this.getDependanceContainerConfiguration());
+        dependanceContainerConfiguration = new DependanceContainerConfigurationImpl(this.getConfiguration());
     }
 
     @Override
