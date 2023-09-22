@@ -1,21 +1,23 @@
-package io.github.jwdeveloper.dependance;
+package io.github.jwdeveloper.dependance.implementation;
 
+import io.github.jwdeveloper.dependance.api.events.AutoScanEvent;
+import io.github.jwdeveloper.dependance.implementation.common.JarScanner;
 import io.github.jwdeveloper.dependance.injector.api.annotations.IgnoreInjection;
 import io.github.jwdeveloper.dependance.injector.api.annotations.Injection;
 import io.github.jwdeveloper.dependance.injector.api.containers.builders.ContainerBuilder;
-import io.github.jwdeveloper.dependance.injector.implementation.containers.builder.ContainerBuilderImpl;
+import io.github.jwdeveloper.dependance.injector.implementation.containers.ContainerConfigurationImpl;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
 public class InjectionInfoSearch {
-    ContainerBuilderImpl<?> containerBuilder;
+    DependanceContainerBuilder containerBuilder;
     List<Class<?>> toInitializeTypes;
     Class<?> _package;
 
-    public InjectionInfoSearch(ContainerBuilder<?> containerBuilder, Class<?> clazz) {
-        this.containerBuilder = (ContainerBuilderImpl<?>) containerBuilder;
+    public InjectionInfoSearch(ContainerBuilder containerBuilder, Class<?> clazz) {
+        this.containerBuilder = (DependanceContainerBuilder) containerBuilder;
         this.toInitializeTypes = new ArrayList<>();
         this._package = clazz;
     }
@@ -24,8 +26,10 @@ public class InjectionInfoSearch {
         var scanner = new JarScanner(_package, Logger.getLogger(JarScanner.class.getSimpleName()));
         var classes = scanner.findByAnnotation(Injection.class);
 
-        var config = containerBuilder.getConfiguration();
+        var dependecyContainerConfig = containerBuilder.getDependanceContainerConfiguration();
+        var config = (ContainerConfigurationImpl)dependecyContainerConfig.getConfiguration();
         var registeredTypes = config.getRegisterdTypes();
+
 
         for (var _class : classes) {
             if (registeredTypes.contains(_class) ||
@@ -34,6 +38,12 @@ public class InjectionInfoSearch {
                 continue;
             }
             registerType(_class);
+        }
+
+        var autoScanEvents  = new AutoScanEvent();
+        for(var event : dependecyContainerConfig.getAutoScanEvents())
+        {
+            event.accept(autoScanEvents);
         }
         return toInitializeTypes;
     }

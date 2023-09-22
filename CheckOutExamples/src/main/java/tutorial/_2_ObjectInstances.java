@@ -11,7 +11,7 @@ public class _2_ObjectInstances
     {
         var myConfigInstance = new Config();
         var container = Dependance.newContainer()
-                .registerTransient(Config.class, myConfigInstance)
+                .registerSingleton(Config.class, myConfigInstance)
                 .registerTransient(LocalShop.class,(e)->
                 {
                     var config = (Config)e.find(Config.class);

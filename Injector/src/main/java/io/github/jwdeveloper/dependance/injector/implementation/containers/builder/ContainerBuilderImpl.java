@@ -1,6 +1,7 @@
 package io.github.jwdeveloper.dependance.injector.implementation.containers.builder;
 
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
+import io.github.jwdeveloper.dependance.injector.api.containers.ContainerConfiguration;
 import io.github.jwdeveloper.dependance.injector.api.containers.builders.ContainerBuilder;
 import io.github.jwdeveloper.dependance.injector.api.containers.builders.ContainerBuilderConfiguration;
 import io.github.jwdeveloper.dependance.injector.api.enums.LifeTime;
@@ -22,7 +23,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-public class ContainerBuilderImpl<Builder extends ContainerBuilder<Builder>> implements ContainerBuilder<Builder>, ContainerBuilderConfiguration {
+public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder extends ContainerBuilder<Config,Builder>> implements ContainerBuilder<Config,Builder>{
     protected final ContainerConfigurationImpl config;
     protected final Logger logger;
 
@@ -41,6 +42,12 @@ public class ContainerBuilderImpl<Builder extends ContainerBuilder<Builder>> imp
         return config;
     }
 
+
+    @Override
+    public Builder configure(Consumer<Config> configuration) {
+        configuration.accept((Config) config);
+        return builder();
+    }
 
     public Builder register(RegistrationInfo registrationInfo) {
         config.addRegistration(registrationInfo);
@@ -159,11 +166,7 @@ public class ContainerBuilderImpl<Builder extends ContainerBuilder<Builder>> imp
         return register(_interface, LifeTime.TRANSIENT, provider);
     }
 
-    @Override
-    public Builder configure(Consumer<ContainerConfigurationImpl> configuration) {
-        configuration.accept(config);
-        return builder();
-    }
+
 
     private Builder builder() {
         return (Builder) this;

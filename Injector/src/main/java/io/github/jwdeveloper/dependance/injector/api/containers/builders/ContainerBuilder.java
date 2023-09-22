@@ -1,6 +1,7 @@
 package io.github.jwdeveloper.dependance.injector.api.containers.builders;
 
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
+import io.github.jwdeveloper.dependance.injector.api.containers.ContainerConfiguration;
 import io.github.jwdeveloper.dependance.injector.api.enums.LifeTime;
 import io.github.jwdeveloper.dependance.injector.api.models.RegistrationInfo;
 import io.github.jwdeveloper.dependance.injector.implementation.containers.ContainerConfigurationImpl;
@@ -8,9 +9,9 @@ import io.github.jwdeveloper.dependance.injector.implementation.containers.Conta
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public interface ContainerBuilder<Builder extends ContainerBuilder<Builder>> {
+public interface ContainerBuilder<Config extends ContainerConfiguration,  Builder extends ContainerBuilder<Config,Builder>> {
 
-    Builder configure(Consumer<ContainerConfigurationImpl> configuration);
+    Builder configure(Consumer<Config> configuration);
 
     Builder register(RegistrationInfo registrationInfo);
 

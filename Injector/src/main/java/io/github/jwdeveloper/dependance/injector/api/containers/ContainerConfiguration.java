@@ -9,7 +9,6 @@ import java.util.function.Function;
 public interface ContainerConfiguration {
 
     void onInjection(Function<OnInjectionEvent, Object> event);
-
     void onRegistration(Function<OnRegistrationEvent, Boolean> event);
     void onEvent(ContainerEvents event);
 }

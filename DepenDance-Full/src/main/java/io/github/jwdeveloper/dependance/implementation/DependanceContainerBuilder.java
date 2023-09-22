@@ -1,22 +1,37 @@
-package io.github.jwdeveloper.dependance;
+package io.github.jwdeveloper.dependance.implementation;
 
 import io.github.jwdeveloper.dependacne.decorator.api.builder.DecoratorBuilder;
 import io.github.jwdeveloper.dependacne.decorator.implementation.DecoratorBuilderImpl;
+import io.github.jwdeveloper.dependance.api.DependanceContainerConfiguration;
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
 import io.github.jwdeveloper.dependance.injector.implementation.containers.builder.ContainerBuilderImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.factory.InjectionInfoFactoryImpl;
+import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Consumer;
 
-public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceContainerBuilder> {
+public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceContainerConfiguration, DependanceContainerBuilder> {
 
     private final DecoratorBuilder decoratorBuilder;
     private final List<Class<?>> classesToInitialize;
-    public DependanceContainerBuilder() {
+
+    @Getter
+    private final DependanceContainerConfigurationImpl dependanceContainerConfiguration;
+    public DependanceContainerBuilder()
+    {
+        super();
         this.decoratorBuilder = new DecoratorBuilderImpl(new InjectionInfoFactoryImpl(), new HashMap<>());
         classesToInitialize = new ArrayList<>();
+        dependanceContainerConfiguration = new DependanceContainerConfigurationImpl(this.getDependanceContainerConfiguration());
+    }
+
+    @Override
+    public DependanceContainerBuilder configure(Consumer<DependanceContainerConfiguration> consumer) {
+        consumer.accept(dependanceContainerConfiguration);
+        return this;
     }
 
     public <T> DependanceContainerBuilder registerDecorator(Class<T> _interface, Class<? extends T> implementation) {

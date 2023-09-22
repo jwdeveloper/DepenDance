@@ -2,7 +2,7 @@ package common;
 
 
 import io.github.jwdeveloper.dependance.Dependance;
-import io.github.jwdeveloper.dependance.DependanceContainerBuilder;
+import io.github.jwdeveloper.dependance.implementation.DependanceContainerBuilder;
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
 import org.junit.Assert;
 import org.junit.Before;

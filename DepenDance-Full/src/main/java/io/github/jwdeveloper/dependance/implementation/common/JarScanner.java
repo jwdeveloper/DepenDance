@@ -1,4 +1,4 @@
-package io.github.jwdeveloper.dependance;
+package io.github.jwdeveloper.dependance.implementation.common;
 
 import lombok.Getter;
 
