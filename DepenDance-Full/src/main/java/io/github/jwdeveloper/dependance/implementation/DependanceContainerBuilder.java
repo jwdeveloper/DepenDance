@@ -1,30 +1,49 @@
+/*
+ * Copyright (c) 2023-2023 jwdeveloper  <jacekwoln@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.github.jwdeveloper.dependance.implementation;
 
-import io.github.jwdeveloper.dependacne.decorator.api.builder.DecoratorBuilder;
-import io.github.jwdeveloper.dependacne.decorator.implementation.DecoratorBuilderImpl;
 import io.github.jwdeveloper.dependance.api.DependanceContainerConfiguration;
+import io.github.jwdeveloper.dependance.decorator.api.builder.DecoratorBuilder;
+import io.github.jwdeveloper.dependance.decorator.implementation.DecoratorBuilderImpl;
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
 import io.github.jwdeveloper.dependance.injector.implementation.containers.builder.ContainerBuilderImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.factory.InjectionInfoFactoryImpl;
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.function.Consumer;
 
 public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceContainerConfiguration, DependanceContainerBuilder> {
 
     private final DecoratorBuilder decoratorBuilder;
-    private final List<Class<?>> classesToInitialize;
+    private Class<?> autoRegistrationRoot;
 
     @Getter
     private final DependanceContainerConfigurationImpl dependanceContainerConfiguration;
-    public DependanceContainerBuilder()
-    {
+
+    public DependanceContainerBuilder() {
         super();
         this.decoratorBuilder = new DecoratorBuilderImpl(new InjectionInfoFactoryImpl(), new HashMap<>());
-        classesToInitialize = new ArrayList<>();
         dependanceContainerConfiguration = new DependanceContainerConfigurationImpl(this.getConfiguration());
     }
 
@@ -39,19 +58,31 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
         return this;
     }
 
-    public DependanceContainerBuilder autoRegistration(Class<?> root)
-    {
-        var search = new InjectionInfoSearch(this,root);
-        classesToInitialize.addAll(search.scanAndRegister());
+    public DependanceContainerBuilder autoRegistration(Class<?> root) {
+        autoRegistrationRoot = root;
         return this;
     }
 
     @Override
-    public Container build()
-    {
+    public Container build() {
         var decorator = decoratorBuilder.build();
         configure(config -> config.onEvent(decorator));
 
+
+        if(autoRegistrationRoot == null)
+        {
+            return super.build();
+        }
+
+        var search = new InjectionInfoSearch(this, autoRegistrationRoot);
+        var toInitialize = search.scanAndRegister();
+        var container = super.build();
+        for (var clazz : toInitialize) {
+            container.find(clazz);
+        }
+        return container;
+
+            /*
         configure(config -> config.onInjection(e ->
         {
             if(!e.input().isAssignableFrom(List.class))
@@ -74,12 +105,6 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
             {
                 return new ArrayList<>();
             }
-        }));
-        var container= super.build();
-        for(var clazz : classesToInitialize)
-        {
-            container.find(clazz);
-        }
-        return container;
+        }));*/
     }
 }
