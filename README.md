@@ -49,7 +49,7 @@
 </div>
 
 
-<h1>Installation</h1>
+<h1>Install</h1>
 
 
 ```xml
@@ -77,22 +77,18 @@ public static void main(String[] args)
     {
         /*
            - Singleton There will be only one instance of object created by container
-           - Transient everytime `container.find` is used new instance is created
+           - Transient everytime `container.find` is used new instance of object is created
          */
 
-        var container = Dependance.newContainer()
+        DependanceContainer container = Dependance.newContainer()
                 .registerTransient(Shop.class, LocalShop.class) //registration interface to class
                 .registerSingleton(Config.class)
                 .registerSingleton(ShopManager.class)
-
-                //auto-register all classes with annotation @injection
-                // that are in same package as input
-                .autoRegistration(_1_Basic.class)
                 .build();
 
 
-        var shopManager1 = (ShopManager)container.find(ShopManager.class);
-        var shopManager2 = (ShopManager)container.find(ShopManager.class);
+        ShopManager shopManager1 = container.find(ShopManager.class);
+        ShopManager shopManager2 = container.find(ShopManager.class);
 
         Assert.assertEquals(shopManager1, shopManager2);
         Assert.assertEquals(shopManager1.getConfig(), shopManager2.getConfig());
@@ -105,8 +101,8 @@ public static void main(String[] args)
 ```java
 public static void main(String[] args)
     {
-        var myConfigInstance = new Config();
-        var container = Dependance.newContainer()
+        Config myConfigInstance = new Config();
+        DependanceContainer container = Dependance.newContainer()
                 .registerSingleton(Config.class, myConfigInstance)
                 .registerTransient(LocalShop.class,(e)->
                 {
@@ -118,9 +114,9 @@ public static void main(String[] args)
                 .build();
 
 
-        var config = (Config)container.find(Config.class);
-        var shop1 = container.find(LocalShop.class);
-        var shop2 = container.find(LocalShop.class);
+        Config config = container.find(Config.class);
+        LocalShop shop1 = container.find(LocalShop.class);
+        LocalShop shop2 = container.find(LocalShop.class);
 
         Assert.assertEquals(myConfigInstance, config);
         Assert.assertNotEquals(shop1, shop2);
@@ -132,14 +128,14 @@ public static void main(String[] args)
 ```java
 public static void main(String[] args)
     {
-        var container = Dependance.newContainer()
+        DependanceContainer container = Dependance.newContainer()
                 .registerTransient(Shop.class, OnlineShop.class)
                 .registerTransient(Shop.class, LocalShop.class)
                 .registerTransientList(Shop.class)
                 .build();
 
 
-        var shops = (List<Shop>)container.find(List.class,Shop.class);
+        List<Shop> shops = (List<Shop>)container.find(List.class,Shop.class);
 
         Assert.assertNotEquals(2, shops.size());
         Assert.assertNotEquals(OnlineShop.class, shops.get(0).getClass());
@@ -152,7 +148,7 @@ public static void main(String[] args)
 ```java
 public static void main(String[] args)
     {
-        var container = Dependance.newContainer()
+        DependanceContainer container = Dependance.newContainer()
                 .registerSingleton(Shop.class,LocalShop.class)
                 .registerSingleton(Shop.class, OnlineShop.class)
                 .configure(config ->
@@ -162,7 +158,7 @@ public static void main(String[] args)
                 })
                 .build();
 
-        var shops = container.find(Shop.class, String.class);
+        Object shops = container.find(Shop.class, String.class);
     }
 
 
@@ -241,7 +237,7 @@ public static void main(String[] args) {
 ```java
 public static void main(String[] args) {
 
-        var container = Dependance.newContainer()
+        DependanceContainer container = Dependance.newContainer()
                 .autoRegistration(_6_AutoScan.class)
                 .configure(config ->
                 {
