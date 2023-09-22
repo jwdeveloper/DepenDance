@@ -22,6 +22,7 @@
  */
 package tutorial;
 
+import io.github.jwdeveloper.dependance.api.DependanceContainer;
 import tutorial.models.Config;
 import tutorial.models.LocalShop;
 import tutorial.models.Shop;
@@ -34,22 +35,18 @@ public class _1_Basic {
     {
         /*
            - Singleton There will be only one instance of object created by container
-           - Transient everytime `container.find` is used new instance is created
+           - Transient everytime `container.find` is used new instance of object is created
          */
 
-        var container = Dependance.newContainer()
+        DependanceContainer container = Dependance.newContainer()
                 .registerTransient(Shop.class, LocalShop.class) //registration interface to class
                 .registerSingleton(Config.class)
                 .registerSingleton(ShopManager.class)
-
-                //auto-register all classes with annotation @injection
-                // that are in same package as input
-                .autoRegistration(_1_Basic.class)
                 .build();
 
 
-        var shopManager1 = (ShopManager)container.find(ShopManager.class);
-        var shopManager2 = (ShopManager)container.find(ShopManager.class);
+        ShopManager shopManager1 = container.find(ShopManager.class);
+        ShopManager shopManager2 = container.find(ShopManager.class);
 
         Assert.assertEquals(shopManager1, shopManager2);
         Assert.assertEquals(shopManager1.getConfig(), shopManager2.getConfig());

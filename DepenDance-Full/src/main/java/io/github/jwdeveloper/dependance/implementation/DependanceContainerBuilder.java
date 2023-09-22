@@ -22,10 +22,10 @@
  */
 package io.github.jwdeveloper.dependance.implementation;
 
+import io.github.jwdeveloper.dependance.api.DependanceContainer;
 import io.github.jwdeveloper.dependance.api.DependanceContainerConfiguration;
 import io.github.jwdeveloper.dependance.decorator.api.builder.DecoratorBuilder;
 import io.github.jwdeveloper.dependance.decorator.implementation.DecoratorBuilderImpl;
-import io.github.jwdeveloper.dependance.injector.api.containers.Container;
 import io.github.jwdeveloper.dependance.injector.implementation.containers.builder.ContainerBuilderImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.factory.InjectionInfoFactoryImpl;
 import lombok.Getter;
@@ -64,14 +64,13 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
     }
 
     @Override
-    public Container build() {
+    public DependanceContainer build() {
         var decorator = decoratorBuilder.build();
         configure(config -> config.onEvent(decorator));
 
 
-        if(autoRegistrationRoot == null)
-        {
-            return super.build();
+        if (autoRegistrationRoot == null) {
+            return new DepenDanceContainerImpl(super.build());
         }
 
         var search = new InjectionInfoSearch(this, autoRegistrationRoot);
@@ -80,31 +79,8 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
         for (var clazz : toInitialize) {
             container.find(clazz);
         }
-        return container;
+        return new DepenDanceContainerImpl(container);
 
-            /*
-        configure(config -> config.onInjection(e ->
-        {
-            if(!e.input().isAssignableFrom(List.class))
-            {
-                return e.output();
-            }
-            if(e.inputGenericParameters().length == 0)
-            {
-                throw new RuntimeException("There should be generic parameter provided for list");
-            }
-            var parameter = e.inputGenericParameters()[0];
 
-            try
-            {
-                var clazz = Class.forName(parameter.getTypeName());
-                var instances = e.container().findAllByInterface(clazz);
-                return instances.stream().toList();
-            }
-            catch (Exception ex)
-            {
-                return new ArrayList<>();
-            }
-        }));*/
     }
 }

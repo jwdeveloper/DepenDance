@@ -22,17 +22,18 @@
  */
 package tutorial;
 
+import io.github.jwdeveloper.dependance.api.DependanceContainer;
 import tutorial.models.Config;
 import tutorial.models.LocalShop;
 import io.github.jwdeveloper.dependance.Dependance;
 import org.junit.Assert;
 
-public class _2_ObjectInstances
+public class _2_Object_Instances
 {
     public static void main(String[] args)
     {
-        var myConfigInstance = new Config();
-        var container = Dependance.newContainer()
+        Config myConfigInstance = new Config();
+        DependanceContainer container = Dependance.newContainer()
                 .registerSingleton(Config.class, myConfigInstance)
                 .registerTransient(LocalShop.class,(e)->
                 {
@@ -44,9 +45,9 @@ public class _2_ObjectInstances
                 .build();
 
 
-        var config = (Config)container.find(Config.class);
-        var shop1 = container.find(LocalShop.class);
-        var shop2 = container.find(LocalShop.class);
+        Config config = container.find(Config.class);
+        LocalShop shop1 = container.find(LocalShop.class);
+        LocalShop shop2 = container.find(LocalShop.class);
 
         Assert.assertEquals(myConfigInstance, config);
         Assert.assertNotEquals(shop1, shop2);

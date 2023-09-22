@@ -41,13 +41,16 @@ public class Main {
         var targetFile = new File("temp.file");
         FileUtils.copyInputStreamToFile(inputStream, targetFile);
 
+        var output = System.getProperty("user.dir");
+
         DescriptionGenerator generator = Descrabble.create()
                 .withTemplate(targetFile)
                 .withVariable("version", version)
+                .withDecorator(new TutorialDecorator(output))
                 .withPlugin(DescrabbleGithub.plugin("readme.md"))
                 .build();
 
-        var output = System.getProperty("user.dir");
+
         generator.generate(output);
         targetFile.delete();
         inputStream.close();

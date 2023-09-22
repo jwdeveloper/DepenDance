@@ -31,4 +31,5 @@ import java.util.function.Function;
 public interface DependanceContainerConfiguration extends ContainerConfiguration
 {
     void onAutoScan(Function<AutoScanEvent,Boolean> event);
+
 }

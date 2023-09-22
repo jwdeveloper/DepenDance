@@ -22,6 +22,7 @@
  */
 package tutorial;
 
+import io.github.jwdeveloper.dependance.api.DependanceContainer;
 import io.github.jwdeveloper.dependance.injector.api.events.events.OnInjectionEvent;
 import io.github.jwdeveloper.dependance.injector.api.events.events.OnRegistrationEvent;
 import tutorial.models.LocalShop;
@@ -33,7 +34,7 @@ public class _4_Events
 {
     public static void main(String[] args)
     {
-        var container = Dependance.newContainer()
+        DependanceContainer container = Dependance.newContainer()
                 .registerSingleton(Shop.class,LocalShop.class)
                 .registerSingleton(Shop.class, OnlineShop.class)
                 .configure(config ->
@@ -43,7 +44,7 @@ public class _4_Events
                 })
                 .build();
 
-        var shops = container.find(Shop.class, String.class);
+        Object shops = container.find(Shop.class, String.class);
     }
 
 

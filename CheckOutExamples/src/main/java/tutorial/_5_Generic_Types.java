@@ -26,9 +26,7 @@ import io.github.jwdeveloper.dependance.Dependance;
 import tutorial.models.*;
 
 
-public class _5_GenericTypes {
-
-
+public class _5_Generic_Types {
 
     public static void main(String[] args) {
 
