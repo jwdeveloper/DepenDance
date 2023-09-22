@@ -9,9 +9,20 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>io.github.jwdeveloper.dependance.examples</groupId>
-    <artifactId>CheckOutExamples</artifactId>
+    <artifactId>Tools-Benchmark</artifactId>
+
+
     <dependencies>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-core</artifactId>
+            <version>1.33</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjdk.jmh</groupId>
+            <artifactId>jmh-generator-annprocess</artifactId>
+            <version>1.33</version>
+        </dependency>
         <dependency>
             <groupId>io.github.jwdeveloper.dependance</groupId>
             <artifactId>DepenDance-Full</artifactId>
@@ -19,15 +30,9 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.13.2</version>
-        </dependency>
-        <dependency>
-            <groupId>io.github.jwdeveloper.dependance</groupId>
-            <artifactId>Tools-Benchmark</artifactId>
-            <version>1.0-SNAPSHOT</version>
-            <scope>compile</scope>
+            <groupId>com.google.inject</groupId>
+            <artifactId>guice</artifactId>
+            <version>5.0.1</version> <!-- Check for the latest version on Maven Central -->
         </dependency>
     </dependencies>
 

@@ -13,6 +13,7 @@
         <module>Decorator</module>
         <module>CheckOutExamples</module>
         <module>DepenDance-Full</module>
+        <module>Tools-Benchmark</module>
     </modules>
 
     <build>

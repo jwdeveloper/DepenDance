@@ -1,12 +1,13 @@
 package io.github.jwdeveloper.dependance.injector.implementation.factory;
 
 import io.github.jwdeveloper.dependance.injector.api.annotations.Inject;
+import io.github.jwdeveloper.dependance.injector.api.exceptions.ContainerException;
+import io.github.jwdeveloper.dependance.injector.api.exceptions.DeathCycleException;
 import io.github.jwdeveloper.dependance.injector.api.factory.InjectionInfoFactory;
 import io.github.jwdeveloper.dependance.injector.api.models.InjectionInfo;
 import io.github.jwdeveloper.dependance.injector.api.models.RegistrationInfo;
-import io.github.jwdeveloper.dependance.injector.implementation.utilites.Messages;
 import io.github.jwdeveloper.dependance.injector.api.util.Pair;
-
+import io.github.jwdeveloper.dependance.injector.implementation.utilites.Messages;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -30,14 +31,16 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
     private Pair<Class<?>, InjectionInfo> OnlyImplStrategy(RegistrationInfo info) throws Exception {
         var impl = info.implementation();
         if (Modifier.isAbstract(impl.getModifiers())) {
-            throw new Exception("Abstract class can't be register to Injection " + impl.getName());
+            throw new ContainerException("Abstract class can't be register to Injection " + impl.getName());
         }
         if (Modifier.isInterface(impl.getModifiers())) {
-            throw new Exception("Implementation must be class, not Interface");
+            throw new ContainerException("Implementation must be class, not Interface");
         }
 
         var result = new InjectionInfo();
         var constructor = getConstructor(impl);
+        throwIfCycleDependency(constructor, impl, impl);
+
         var extentedTypes = getExtentedTypes(impl);
         var implementedTypes = getImplementedTypes(impl);
         var annotations = getAnnotations(impl, extentedTypes);
@@ -56,18 +59,20 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         var impl = info.implementation();
         var _interface = info._interface();
         if (Modifier.isAbstract(impl.getModifiers())) {
-            throw new Exception("Abstract class can't be register to Injection " + impl.getName());
+            throw new ContainerException("Abstract class can't be register to Injection " + impl.getName());
         }
         if (Modifier.isInterface(impl.getModifiers())) {
-            throw new Exception("Implementation must be class, not Interface");
+            throw new ContainerException("Implementation must be class, not Interface");
         }
 
         var result = new InjectionInfo();
         var constructor = getConstructor(impl);
-        var extentedTypes = getExtentedTypes(impl);
+        throwIfCycleDependency(constructor, impl, impl);
+
+        var extendedTypes = getExtentedTypes(impl);
         var implementedTypes = getImplementedTypes(impl);
-        var annotations = getAnnotations(impl, extentedTypes);
-        result.setSuperClasses(extentedTypes);
+        var annotations = getAnnotations(impl, extendedTypes);
+        result.setSuperClasses(extendedTypes);
         result.setInterfaces(implementedTypes);
         result.setAnnotations(annotations);
 
@@ -90,7 +95,7 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
     private Pair<Class<?>, InjectionInfo> ListStrategy(RegistrationInfo info) throws Exception {
         var _interface = info._interface();
         if (!Modifier.isInterface(_interface.getModifiers()) || !Modifier.isAbstract(_interface.getModifiers())) {
-            throw new Exception("Implementation must be an Interface or Abstract class");
+            throw new ContainerException(Messages.INJECTION_LIST_ALLOWED_TYPES);
         }
 
         var result = new InjectionInfo();
@@ -143,7 +148,7 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         return superClassTypes;
     }
 
-    private Constructor getConstructor(Class<?> _class) throws Exception {
+    private Constructor getConstructor(Class<?> _class) {
         var consturctors = _class.getConstructors();
         if (consturctors.length == 1) {
             return consturctors[0];
@@ -155,7 +160,17 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
 
             return consturctor;
         }
-        throw new Exception(Messages.INJECTION_USE_ANNOTATION_WITH_MORE_CONSTUROCTORS);
+        throw new ContainerException(Messages.INJECTION_USE_ANNOTATION_WITH_MORE_CONSTUROCTORS);
+    }
+
+    private void throwIfCycleDependency(Constructor constructor, Class<?> current, Class<?> root) {
+        for (var param : constructor.getParameterTypes()) {
+            if (param.equals(root)) {
+                throw new DeathCycleException(Messages.INJECTION_DETECTED_CYCLE_DEPENDECY, root.getSimpleName(), current.getSimpleName());
+            }
+            var ctr = getConstructor(param);
+            throwIfCycleDependency(ctr, param, root);
+        }
     }
 
 }
