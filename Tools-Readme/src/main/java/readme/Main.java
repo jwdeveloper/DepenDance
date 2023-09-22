@@ -20,32 +20,36 @@
  * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
  * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-package tutorial;
+package readme;
 
-import io.github.jwdeveloper.dependance.Dependance;
-import io.github.jwdeveloper.dependance.exampleClasses.ExampleClass;
+import io.github.jwdeveloper.descrabble.api.DescriptionGenerator;
+import io.github.jwdeveloper.descrabble.framework.Descrabble;
+import io.github.jwdeveloper.descrabble.plugin.github.DescrabbleGithub;
+import org.apache.commons.io.FileUtils;
 
+import java.io.File;
+import java.io.IOException;
 
-public class _6_AutoScan
-{
-    public static void main(String[] args) {
+public class Main {
+    public static void main(String[] args) throws IOException {
+        var version = System.getenv("VERSION");
+        if (version == null || version.equals("")) {
+            version = "[Replace with current version]";
+        }
 
-        var container = Dependance.newContainer()
-                .autoRegistration(_6_AutoScan.class)
-                .configure(config ->
-                {
-                    config.onAutoScan(autoScanEvent ->
-                    {
-                       if(autoScanEvent.getTarget().equals(ExampleClass.class))
-                       {
-                           return false;
-                       }
-                       return true;
-                    });
-                })
+        var inputStream = Main.class.getResourceAsStream("/readme-template.html");
+        var targetFile = new File("temp.file");
+        FileUtils.copyInputStreamToFile(inputStream, targetFile);
+
+        DescriptionGenerator generator = Descrabble.create()
+                .withTemplate(targetFile)
+                .withVariable("version", version)
+                .withPlugin(DescrabbleGithub.plugin("readme.md"))
                 .build();
 
-
-        container.find(ExampleClass.class);
+        var output = System.getProperty("user.dir");
+        generator.generate(output);
+        targetFile.delete();
+        inputStream.close();
     }
 }
