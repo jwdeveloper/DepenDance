@@ -54,17 +54,17 @@
 
 ### content
 
-[.1 Basic](https://github.com/jwdeveloper/DepenDance/edit/master/README.md#Basic) 
+[.1 Basic](https://github.com/jwdeveloper/DepenDance#Basic) 
 
-[.2 Object Instances](https://github.com/jwdeveloper/DepenDance/edit/master/README.md#Object-Instances) 
+[.2 Object Instances](https://github.com/jwdeveloper/DepenDance#Object-Instances) 
 
-[.3 Lists](https://github.com/jwdeveloper/DepenDance/edit/master/README.md#Lists) 
+[.3 Lists](https://github.com/jwdeveloper/DepenDance#Lists) 
 
-[.4 Events](https://github.com/jwdeveloper/DepenDance/edit/master/README.md#Events) 
+[.4 Events](https://github.com/jwdeveloper/DepenDance#Events) 
 
-[.5 Generic Types](https://github.com/jwdeveloper/DepenDance/edit/master/README.md#Generic-Types) 
+[.5 Generic Types](https://github.com/jwdeveloper/DepenDance#Generic-Types) 
 
-[.6 AutoScan](https://github.com/jwdeveloper/DepenDance/edit/master/README.md#AutoScan) </div>
+[.6 AutoScan](https://github.com/jwdeveloper/DepenDance#AutoScan) </div>
 
 ## Basic
 
