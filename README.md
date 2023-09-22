@@ -11,19 +11,10 @@
 </div>
 
 
-
-<br>
-<br>
-
-
 <div align="center" >
 
 <h1>Dependace</h1>
 Instantly generate production-ready Node.js backend apps 🚀
-
-
-
-
 <div align="center" >
 
 
