@@ -24,7 +24,7 @@
 
 <a target="blank" >
 
-<img src="https://jitpack.io/v/jwdeveloper/DepenDance.svg" width="11%" >
+<img src="https://jitpack.io/v/jwdeveloper/DepenDance.svg" width="20%" >
 </img>
 </a>
 
