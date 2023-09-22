@@ -48,7 +48,25 @@
 
 </div>
 
-##  Basic
+
+<div align="left" >
+
+
+### content
+
+[.1 Basic](https://github.com/jwdeveloper/DepenDance/edit/master/README.md#Basic) 
+
+[.2 Object Instances](https://github.com/jwdeveloper/DepenDance/edit/master/README.md#Object-Instances) 
+
+[.3 Lists](https://github.com/jwdeveloper/DepenDance/edit/master/README.md#Lists) 
+
+[.4 Events](https://github.com/jwdeveloper/DepenDance/edit/master/README.md#Events) 
+
+[.5 Generic Types](https://github.com/jwdeveloper/DepenDance/edit/master/README.md#Generic-Types) 
+
+[.6 AutoScan](https://github.com/jwdeveloper/DepenDance/edit/master/README.md#AutoScan) </div>
+
+## Basic
 
 ```java
 public static void main(String[] args)
@@ -78,7 +96,7 @@ public static void main(String[] args)
     }
  
 ```
-##  Object Instances
+## Object Instances
 
 ```java
 public static void main(String[] args)
@@ -105,7 +123,7 @@ public static void main(String[] args)
     }
  
 ```
-##  Lists
+## Lists
 
 ```java
 public static void main(String[] args)
@@ -125,7 +143,7 @@ public static void main(String[] args)
     }
  
 ```
-##  Events
+## Events
 
 ```java
 public static void main(String[] args)
@@ -166,7 +184,7 @@ public static void main(String[] args)
     }
  
 ```
-##  Generic Types
+## Generic Types
 
 ```java
 public static void main(String[] args) {
@@ -214,7 +232,7 @@ public static void main(String[] args) {
 
  
 ```
-##  AutoScan
+## AutoScan
 
 ```java
 public static void main(String[] args) {
