@@ -47,7 +47,7 @@ public class Main {
                 .withTemplate(targetFile)
                 .withVariable("version", version)
                 .withDecorator(new TutorialDecorator(output))
-                .withPlugin(DescrabbleGithub.plugin("readme.md"))
+                .withPlugin(DescrabbleGithub.plugin("README.md"))
                 .build();
 
 
