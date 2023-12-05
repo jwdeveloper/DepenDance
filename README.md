@@ -69,6 +69,58 @@
 
 <h1>Examples</h1>
 
+### Basic
+
+```java
+public static void main(String[] args)
+    {
+        /*
+           - Singleton There will be only one instance of object created by container
+           - Transient everytime `container.find` is used new instance of object is created
+         */
+
+        DependanceContainer container = Dependance.newContainer()
+                .registerTransient(Shop.class, LocalShop.class) //registration interface to class
+                .registerSingleton(Config.class)
+                .registerSingleton(ShopManager.class)
+                .build();
+
+
+        ShopManager shopManager1 = container.find(ShopManager.class);
+        ShopManager shopManager2 = container.find(ShopManager.class);
+
+        Assert.assertEquals(shopManager1, shopManager2);
+        Assert.assertEquals(shopManager1.getConfig(), shopManager2.getConfig());
+        Assert.assertNotEquals(shopManager1.getShop(), shopManager2.getShop());
+    }
+ 
+```
+### AutoScan
+
+```java
+public static void main(String[] args) {
+
+        DependanceContainer container = Dependance.newContainer()
+                .autoRegistration(_6_AutoScan.class)
+                .configure(config ->
+                {
+                    config.onAutoScan(autoScanEvent ->
+                    {
+                       if(autoScanEvent.getTarget().equals(ExampleClass.class))
+                       {
+                           return false;
+                       }
+                       return true;
+                    });
+                })
+                .build();
+
+
+        container.find(ExampleClass.class);
+    }
+ 
+```
+
 
 ### Lists
 
@@ -203,57 +255,6 @@ public static void main(String[] args)
 
         Assert.assertEquals(myConfigInstance, config);
         Assert.assertNotEquals(shop1, shop2);
-    }
- 
-```
-### Basic
-
-```java
-public static void main(String[] args)
-    {
-        /*
-           - Singleton There will be only one instance of object created by container
-           - Transient everytime `container.find` is used new instance of object is created
-         */
-
-        DependanceContainer container = Dependance.newContainer()
-                .registerTransient(Shop.class, LocalShop.class) //registration interface to class
-                .registerSingleton(Config.class)
-                .registerSingleton(ShopManager.class)
-                .build();
-
-
-        ShopManager shopManager1 = container.find(ShopManager.class);
-        ShopManager shopManager2 = container.find(ShopManager.class);
-
-        Assert.assertEquals(shopManager1, shopManager2);
-        Assert.assertEquals(shopManager1.getConfig(), shopManager2.getConfig());
-        Assert.assertNotEquals(shopManager1.getShop(), shopManager2.getShop());
-    }
- 
-```
-### AutoScan
-
-```java
-public static void main(String[] args) {
-
-        DependanceContainer container = Dependance.newContainer()
-                .autoRegistration(_6_AutoScan.class)
-                .configure(config ->
-                {
-                    config.onAutoScan(autoScanEvent ->
-                    {
-                       if(autoScanEvent.getTarget().equals(ExampleClass.class))
-                       {
-                           return false;
-                       }
-                       return true;
-                    });
-                })
-                .build();
-
-
-        container.find(ExampleClass.class);
     }
  
 ```
