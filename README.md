@@ -51,6 +51,7 @@
 
 <br>
 
+
 ```xml
 
     <repositories>
@@ -65,21 +66,27 @@
         <version>[Replace with current version]</version>
     </dependency>     
 ```
-<br>
+
 
 Lightweight dependency injection container that is both small and performance efficient
+<h1>Features</h1>
 
-### Features 
 
 - [x] Injecting object via constructor
-- [x] Class Scannner to avoid manual registraton  [Scanner](#autoscan)
-- [x] Register Lists
-- [x] Register object instances
-- [x] Object lifetimes [SINGLETON, TRANSIENT]
-- [x] Generic types
-- [x] Many constructors
-- [x] Customizable, you can customize container with buildin events system 
 
+- [x] Class Scanner to avoid manual registration [Scanner](#autoscan)
+
+- [x] Register Lists
+
+- [x] Register object instances
+
+- [x] Object lifetimes [SINGLETON, TRANSIENT]
+
+- [x] Generic types
+
+- [x] Many constructors
+
+- [x] Customizable, you can customize container with build in events system
 
 
 <h1>Examples</h1>
