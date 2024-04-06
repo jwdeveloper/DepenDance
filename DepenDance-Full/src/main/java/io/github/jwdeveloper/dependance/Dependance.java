@@ -22,12 +22,18 @@
  */
 package io.github.jwdeveloper.dependance;
 
+import io.github.jwdeveloper.dependance.api.JarScanner;
 import io.github.jwdeveloper.dependance.implementation.DependanceContainerBuilder;
+import io.github.jwdeveloper.dependance.implementation.common.JarScannerImpl;
+import io.github.jwdeveloper.dependance.implementation.common.JarScannerOptions;
+import java.util.logging.Logger;
 
-public class Dependance
-{
-    public static DependanceContainerBuilder newContainer()
-    {
+public class Dependance {
+    public static DependanceContainerBuilder newContainer() {
         return new DependanceContainerBuilder();
+    }
+
+    public static JarScanner newJarScanner(JarScannerOptions options, Logger logger) {
+        return new JarScannerImpl(options, logger);
     }
 }

@@ -26,10 +26,11 @@ package io.github.jwdeveloper.dependance.decorator.api;
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
 import io.github.jwdeveloper.dependance.injector.api.models.InjectionInfo;
 
+import java.util.List;
 import java.util.Map;
 
 public interface DecoratorInstanceProvider
 {
-    Object getInstance(InjectionInfo info, Map<Class<?>, InjectionInfo> injections, Object toSwap, Container container) ;
+    Object getInstance(InjectionInfo info, Map<Class<?>, List<InjectionInfo>> injections, Object toSwap, Container container) ;
 
 }

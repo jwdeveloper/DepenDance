@@ -50,14 +50,14 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
         dependanceContainerConfiguration = new DependanceContainerConfigurationImpl(this.getConfiguration());
     }
 
-    @Override
-    public DependanceContainerBuilder configure(Consumer<DependanceContainerConfiguration> consumer) {
-        consumer.accept(dependanceContainerConfiguration);
+    public <T> DependanceContainerBuilder registerDecorator(Class<T> _interface, Class<? extends T> implementation) {
+        decoratorBuilder.decorate(_interface, implementation);
         return this;
     }
 
-    public <T> DependanceContainerBuilder registerDecorator(Class<T> _interface, Class<? extends T> implementation) {
-        decoratorBuilder.decorate(_interface, implementation);
+    @Override
+    public DependanceContainerBuilder configure(Consumer<DependanceContainerConfiguration> consumer) {
+        consumer.accept(dependanceContainerConfiguration);
         return this;
     }
 
@@ -84,8 +84,8 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
             return new DepenDanceContainerImpl(super.build());
         }
 
-        var search = new InjectionInfoSearch(this, options);
-        var toInitialize = search.scanAndRegister();
+        var scanner = new InjectionsScanner(this, options);
+        var toInitialize = scanner.scanAndRegister();
         var container = super.build();
         for (var clazz : toInitialize) {
             container.find(clazz);

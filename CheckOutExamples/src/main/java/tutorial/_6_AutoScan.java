@@ -35,9 +35,9 @@ import tutorial.models.OnlineShop;
 public class _6_AutoScan {
 
     /**
-     *  To avoid boring manually registering Types to container
-     *  use `scan` method that is looking for all Classes and Methods
-     *  with annotation @Injection and register it automatically
+     * To avoid boring manually registering Types to container
+     * use `scan` method that is looking for all Classes and Methods
+     * with annotation @Injection and register it automatically
      */
 
     public static void main(String[] args) {
@@ -51,6 +51,12 @@ public class _6_AutoScan {
 
         DependanceContainer container = Dependance.newContainer()
                 .scan(rootClass)
+                .scan(options ->
+                {
+                    options.setRootPackage(rootClass);
+                    options.addExcludedClass("org.example.ExampleClass");
+                    options.addExcludePackage(String.class.getPackageName());
+                })
                 .build();
 
         Config config = container.find(Config.class);
@@ -67,12 +73,12 @@ public class _6_AutoScan {
 
     /**
      * This is equivalent of
-     *
-     *     container.registerTransient(OnlineShop.class,container1 ->
-     *                 {
-     *                     System.out.println("Hello from the online shop factory");
-     *                     return new OnlineShop();
-     *                 })
+     * <p>
+     * container.registerTransient(OnlineShop.class,container1 ->
+     * {
+     * System.out.println("Hello from the online shop factory");
+     * return new OnlineShop();
+     * })
      */
     @Injection(lifeTime = LifeTime.TRANSIENT)
     private static OnlineShop onlineShopFactory() {
@@ -83,8 +89,8 @@ public class _6_AutoScan {
 
     /**
      * This is equivalent of
-     *
-     *     container.registerSingleton(ExampleScannClass.class);
+     * <p>
+     * container.registerSingleton(ExampleScannClass.class);
      */
     @Injection(lifeTime = LifeTime.SINGLETON)
     public static class ExampleScannClass {

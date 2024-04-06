@@ -28,11 +28,12 @@ import io.github.jwdeveloper.dependance.injector.api.enums.LifeTime;
 import io.github.jwdeveloper.dependance.injector.api.models.InjectionInfo;
 import io.github.jwdeveloper.dependance.injector.implementation.utilites.Messages;
 
+import java.util.List;
 import java.util.Map;
 
 public class DecoratorInstanceProviderImpl implements DecoratorInstanceProvider {
     @Override
-    public Object getInstance(InjectionInfo info, Map<Class<?>, InjectionInfo> injections, Object toSwap, Container container) {
+    public Object getInstance(InjectionInfo info, Map<Class<?>, List<InjectionInfo>> injections, Object toSwap, Container container) {
         try {
             return tryGetInstance(info, injections, toSwap, container);
         } catch (Exception e) {
@@ -40,7 +41,7 @@ public class DecoratorInstanceProviderImpl implements DecoratorInstanceProvider 
         }
     }
 
-    public Object tryGetInstance(InjectionInfo info, Map<Class<?>, InjectionInfo> injections, Object toSwap, Container container) throws Exception {
+    public Object tryGetInstance(InjectionInfo info, Map<Class<?>, List<InjectionInfo>> injections, Object toSwap, Container container) throws Exception {
         if (info.getLifeTime() == LifeTime.SINGLETON && info.getInstnace() != null)
             return info.getInstnace();
 
@@ -52,7 +53,9 @@ public class DecoratorInstanceProviderImpl implements DecoratorInstanceProvider 
                 if (!injections.containsKey(parameter)) {
                     throw new RuntimeException(String.format(Messages.INJECTION_NOT_FOUND, parameter.getTypeName(), info.getInjectionKeyType()));
                 }
-                handler = injections.get(parameter);
+
+                var injectionsInfo = injections.get(parameter);
+                handler = injectionsInfo.get(injectionsInfo.size()-1);
                 if (info.getInjectionKeyType().equals(parameter)) {
                     info.getConstructorPayLoadTemp()[i] = toSwap;
                 } else {

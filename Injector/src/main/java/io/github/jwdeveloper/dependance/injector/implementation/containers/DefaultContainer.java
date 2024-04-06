@@ -76,7 +76,7 @@ public class DefaultContainer implements Container, Registrable {
                     genericParameters,
                     null,
                     null,
-                    new HashMap<>(),
+                    injections,
                     this);
             var result = eventHandler.OnInjection(onInjectionEvent);
             if (result == null) {
@@ -98,7 +98,7 @@ public class DefaultContainer implements Container, Registrable {
                     genericParameters,
                     injectionInfo,
                     instance,
-                    new HashMap<>(),
+                    injections,
                     this);
             return eventHandler.OnInjection(onInjectionEvent);
         } catch (Exception e) {

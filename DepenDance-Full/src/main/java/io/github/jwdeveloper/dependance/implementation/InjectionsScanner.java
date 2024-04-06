@@ -23,7 +23,7 @@
 package io.github.jwdeveloper.dependance.implementation;
 
 import io.github.jwdeveloper.dependance.api.events.AutoScanEvent;
-import io.github.jwdeveloper.dependance.implementation.common.JarScanner;
+import io.github.jwdeveloper.dependance.implementation.common.JarScannerImpl;
 import io.github.jwdeveloper.dependance.implementation.common.JarScannerOptions;
 import io.github.jwdeveloper.dependance.injector.api.annotations.IgnoreInjection;
 import io.github.jwdeveloper.dependance.injector.api.annotations.Injection;
@@ -41,22 +41,21 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-public class InjectionInfoSearch {
+public class InjectionsScanner {
     DependanceContainerBuilder containerBuilder;
     List<Class<?>> toInitializeTypes;
     JarScannerOptions options;
 
-    public InjectionInfoSearch(ContainerBuilder containerBuilder, JarScannerOptions options) {
+    public InjectionsScanner(ContainerBuilder containerBuilder, JarScannerOptions options) {
         this.containerBuilder = (DependanceContainerBuilder) containerBuilder;
         this.toInitializeTypes = new ArrayList<>();
         this.options = options;
     }
 
     public List<Class<?>> scanAndRegister() {
-        var scanner = new JarScanner(options.getRootPackage(), Logger.getLogger(JarScanner.class.getSimpleName()));
-
-        var methods = findMethods(scanner.getClasses());
-        var classes = findClasses(scanner.getClasses());
+        var jarScanner = new JarScannerImpl(options, Logger.getLogger(JarScannerImpl.class.getSimpleName()));
+        var methods = findMethods(jarScanner.getClasses());
+        var classes = findClasses(jarScanner.getClasses());
 
         var containerConfig = containerBuilder.getDependanceContainerConfiguration();
         var config = (ContainerConfigurationImpl) containerConfig.getConfiguration();
@@ -109,26 +108,6 @@ public class InjectionInfoSearch {
         });
     }
 
-    private Set<Method> findMethods(List<Class<?>> classes) {
-        return classes
-                .stream()
-                .flatMap(c -> Arrays.stream(c.getDeclaredMethods()))
-                .filter(e -> Modifier.isStatic(e.getModifiers()) &&
-                        !e.isAnnotationPresent(IgnoreInjection.class) &&
-                        e.isAnnotationPresent(Injection.class))
-                .collect(Collectors.toSet());
-    }
-
-    private Set<Class<?>> findClasses(List<Class<?>> classes) {
-        return classes
-                .stream()
-                .filter(e ->
-                        !e.isInterface() &&
-                                !e.isAnnotationPresent(IgnoreInjection.class) &&
-                                e.isAnnotationPresent(Injection.class))
-                .collect(Collectors.toSet());
-    }
-
     private void registerType(Class<?> clazz, List<Function<AutoScanEvent, Boolean>> autoScanEvents) {
         var injection = clazz.getAnnotation(Injection.class);
         var autoScanEvent = new AutoScanEvent(clazz, containerBuilder, injection);
@@ -154,5 +133,25 @@ public class InjectionInfoSearch {
         }
 
         containerBuilder.register((Class) injection.toInterface(), clazz, injection.lifeTime());
+    }
+
+    private Set<Method> findMethods(List<Class<?>> classes) {
+        return classes
+                .stream()
+                .flatMap(c -> Arrays.stream(c.getDeclaredMethods()))
+                .filter(e -> Modifier.isStatic(e.getModifiers()) &&
+                        !e.isAnnotationPresent(IgnoreInjection.class) &&
+                        e.isAnnotationPresent(Injection.class))
+                .collect(Collectors.toSet());
+    }
+
+    private Set<Class<?>> findClasses(List<Class<?>> classes) {
+        return classes
+                .stream()
+                .filter(e ->
+                        !e.isInterface() &&
+                                !e.isAnnotationPresent(IgnoreInjection.class) &&
+                                e.isAnnotationPresent(Injection.class))
+                .collect(Collectors.toSet());
     }
 }
