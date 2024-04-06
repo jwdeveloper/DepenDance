@@ -48,8 +48,8 @@
 
 </div>
 
-lightweight dependency injection container that is both small and performance efficient
-<h1>Installation</h1>
+
+
 
 
 ```xml
@@ -66,6 +66,30 @@ lightweight dependency injection container that is both small and performance ef
         <version>[Replace with current version]</version>
     </dependency>     
 ```
+
+
+Lightweight dependency injection container that is both small and performance efficient
+<h1>Features</h1>
+
+
+- [x] Injecting object via constructor
+
+- [x] Method object providers
+
+- [x] Class Scanner to avoid manual registration [Scanner](#autoscan)
+
+- [x] You need to get [List of objects](#lists) in the constructor, no problem
+
+- [x] Create [object instance](#object-instances) by yourself and register it to container!
+
+- [x] Object lifetimes [SINGLETON, TRANSIENT] [see](#basic)
+
+- [x] [Generic types](#generic-types)
+
+- [x] [Many constructors](#manyconstructors)
+
+- [x] Highly customizable, adjust container with build in [events](#events) system
+
 
 <h1>Examples</h1>
 
