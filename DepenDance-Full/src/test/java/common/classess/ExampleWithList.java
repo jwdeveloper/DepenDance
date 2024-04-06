@@ -33,10 +33,10 @@ import java.util.List;
 public class ExampleWithList
 {
     @Getter
-    private final List<ExampleInterface> exampleInterfaces;
+    private final List<ExampleCommonInterface> exampleInterfaces;
 
     @Inject
-    public ExampleWithList(List<ExampleInterface> exampleInterfaces) {
+    public ExampleWithList(List<ExampleCommonInterface> exampleInterfaces) {
         this.exampleInterfaces = exampleInterfaces;
     }
 }

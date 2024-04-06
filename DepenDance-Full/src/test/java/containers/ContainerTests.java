@@ -116,4 +116,17 @@ public class ContainerTests extends ContainerTestBase {
 
         Assert.assertNotEquals(list1, list2);
     }
+
+    @Test
+    public void shouldPassListToObjectConstructor() {
+        var container = builder
+                .registerTransient(ExampleCommonInterface.class, ExampleClass.class)
+                .registerTransient(ExampleCommonInterface.class, ExampleClassV2.class)
+                .registerTransientList(ExampleCommonInterface.class)
+                .registerSingleton(ExampleWithList.class)
+                .build();
+
+        var listHolder = (ExampleWithList) container.find(ExampleWithList.class);
+        Assert.assertEquals(2, listHolder.getExampleInterfaces().size());
+    }
 }
