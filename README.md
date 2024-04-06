@@ -63,7 +63,7 @@
     <dependency>
         <groupid>com.github.jwdeveloper.DepenDance</groupid>
         <artifactid>DepenDance-Full</artifactid>
-        <version>[Replace with current version]</version>
+        <version>0.0.6-Release</version>
     </dependency>     
 ```
 
@@ -94,101 +94,6 @@ Lightweight dependency injection container that is both small and performance ef
 <h1>Examples</h1>
 
 
-### Basic
-
-```java
-public class _1_Basic {
-
-
-    public static void main(String[] args) {
-        /*
-           - Singleton There will be only one instance of object created by container
-           - Transient everytime `container.find` is used new instance of object is created
-         */
-
-        DependanceContainer container = Dependance.newContainer()
-                .registerTransient(Shop.class, LocalShop.class) //registration interface to implementation
-                .registerSingleton(Config.class)
-                .registerSingleton(ShopManager.class)
-                .build();
-
-
-        ShopManager shopManager1 = container.find(ShopManager.class);
-        ShopManager shopManager2 = container.find(ShopManager.class);
-
-        Shop shop1 = container.find(Shop.class);
-        Shop shop2 = container.find(Shop.class);
-
-
-        Assert.assertEquals(shopManager1, shopManager2);
-        System.out.println("There always same instance of shop manager");
-
-        Assert.assertEquals(shopManager1.getConfig(), shopManager2.getConfig());
-        System.out.println("There always same instance of config");
-
-        Assert.assertNotEquals(shop1, shop2);
-        System.out.println("There are different instances of shop");
-    }
-} 
-```
-### Object Instances
-
-```java
-public class _2_Object_Instances
-{
-    public static void main(String[] args)
-    {
-        Config myConfigInstance = new Config();
-        DependanceContainer container = Dependance.newContainer()
-                .registerSingleton(Config.class, myConfigInstance) //in case we want to make instance manually we can put object as second argument
-                .registerTransient(LocalShop.class,(di)->
-                {
-                    //more complex case, we want to find or put manually arguments to created instance
-                    //for that we can use lamda resolver that has container as input, and object instance as output
-                    var config = (Config)di.find(Config.class);
-                    var shop = new LocalShop(config);
-                    System.out.println("Shop has been created: "+shop);
-                    return shop;
-                })
-                .build();
-
-        Config config = container.find(Config.class);
-        LocalShop shop1 = container.find(LocalShop.class);
-        LocalShop shop2 = container.find(LocalShop.class);
-
-        Assert.assertEquals(myConfigInstance,config);
-        System.out.println("Config has same instance");
-
-        Assert.assertNotEquals(shop1,shop2);
-        System.out.println("Shops has different instances");
-    }
-} 
-```
-### Lists
-
-```java
-public class _3_Lists {
-    public static void main(String[] args) {
-        DependanceContainer container = Dependance.newContainer()
-                .registerSingleton(Config.class)
-                .registerTransient(Shop.class, OnlineShop.class)
-                .registerTransient(Shop.class, LocalShop.class)
-                .registerTransientList(Shop.class)
-                .build();
-
-
-        List<Shop> shops = (List<Shop>) container.find(List.class, Shop.class);
-
-
-        for (var shop : shops) {
-            System.out.println("Shops: " + shop.getClass().getSimpleName());
-        }
-        Assert.assertEquals(2, shops.size());
-    }
-
-
-} 
-```
 ### Events
 
 ```java
@@ -225,6 +130,28 @@ public class _4_Events {
         System.out.println("OnInjection genericTypes: " + genericTypes.length);
         System.out.println("OnInjection metadata: " + injectonMetadata.toString());
         return outputObject;
+    }
+} 
+```
+### Overriding
+
+```java
+public class _7_Overriding {
+    public static void main(String[] args) {
+
+        DependanceContainer container = Dependance.newContainer()
+                .registerTransient(Shop.class, OnlineShop.class)
+                .registerTransient(Shop.class, OfflineShop.class)
+
+                /**
+                 * By again declaring Shop but with different implementation (OnlineShop)
+                 * We are telling container to Override (OfflineShop) and always returns (OnlineShop)
+                 */
+                .build();
+
+        Shop shop = container.find(Shop.class);
+        Assert.assertEquals(OnlineShop.class, shop.getClass());
+        System.out.println("shop object is instance of OnlineShop Class");
     }
 } 
 ```
@@ -278,6 +205,101 @@ public class _5_Generic_Types {
 
 } 
 ```
+### Basic
+
+```java
+public class _1_Basic {
+
+
+    public static void main(String[] args) {
+        /*
+           - Singleton There will be only one instance of object created by container
+           - Transient everytime `container.find` is used new instance of object is created
+         */
+
+        DependanceContainer container = Dependance.newContainer()
+                .registerTransient(Shop.class, LocalShop.class) //registration interface to implementation
+                .registerSingleton(Config.class)
+                .registerSingleton(ShopManager.class)
+                .build();
+
+
+        ShopManager shopManager1 = container.find(ShopManager.class);
+        ShopManager shopManager2 = container.find(ShopManager.class);
+
+        Shop shop1 = container.find(Shop.class);
+        Shop shop2 = container.find(Shop.class);
+
+
+        Assert.assertEquals(shopManager1, shopManager2);
+        System.out.println("There always same instance of shop manager");
+
+        Assert.assertEquals(shopManager1.getConfig(), shopManager2.getConfig());
+        System.out.println("There always same instance of config");
+
+        Assert.assertNotEquals(shop1, shop2);
+        System.out.println("There are different instances of shop");
+    }
+} 
+```
+### Lists
+
+```java
+public class _3_Lists {
+    public static void main(String[] args) {
+        DependanceContainer container = Dependance.newContainer()
+                .registerSingleton(Config.class)
+                .registerTransient(Shop.class, OnlineShop.class)
+                .registerTransient(Shop.class, LocalShop.class)
+                .registerTransientList(Shop.class)
+                .build();
+
+
+        List<Shop> shops = (List<Shop>) container.find(List.class, Shop.class);
+
+
+        for (var shop : shops) {
+            System.out.println("Shops: " + shop.getClass().getSimpleName());
+        }
+        Assert.assertEquals(2, shops.size());
+    }
+
+
+} 
+```
+### Object Instances
+
+```java
+public class _2_Object_Instances
+{
+    public static void main(String[] args)
+    {
+        Config myConfigInstance = new Config();
+        DependanceContainer container = Dependance.newContainer()
+                .registerSingleton(Config.class, myConfigInstance) //in case we want to make instance manually we can put object as second argument
+                .registerTransient(LocalShop.class,(di)->
+                {
+                    //more complex case, we want to find or put manually arguments to created instance
+                    //for that we can use lamda resolver that has container as input, and object instance as output
+                    var config = (Config)di.find(Config.class);
+                    var shop = new LocalShop(config);
+                    System.out.println("Shop has been created: "+shop);
+                    return shop;
+                })
+                .build();
+
+        Config config = container.find(Config.class);
+        LocalShop shop1 = container.find(LocalShop.class);
+        LocalShop shop2 = container.find(LocalShop.class);
+
+        Assert.assertEquals(myConfigInstance,config);
+        System.out.println("Config has same instance");
+
+        Assert.assertNotEquals(shop1,shop2);
+        System.out.println("Shops has different instances");
+    }
+} 
+```
 ### AutoScan
 
 ```java
@@ -303,8 +325,8 @@ public class _6_AutoScan {
                 .scan(options ->
                 {
                     options.setRootPackage(rootClass);
-                    options.addExcludedClass("org.example.ExampleClass");
-                    options.addExcludePackage(String.class.getPackageName());
+                    options.excludeClass("org.example.ExampleClass");
+                    options.excludePackage(String.class.getPackageName());
                 })
                 .build();
 
@@ -346,28 +368,6 @@ public class _6_AutoScan {
         public ExampleScannClass() {
             System.out.println("Hello world!");
         }
-    }
-} 
-```
-### Overriding
-
-```java
-public class _7_Overriding {
-    public static void main(String[] args) {
-
-        DependanceContainer container = Dependance.newContainer()
-                .registerTransient(Shop.class, OnlineShop.class)
-                .registerTransient(Shop.class, OfflineShop.class)
-
-                /**
-                 * By again declaring Shop but with different implementation (OnlineShop)
-                 * We are telling container to Override (OfflineShop) and always returns (OnlineShop)
-                 */
-                .build();
-
-        Shop shop = container.find(Shop.class);
-        Assert.assertEquals(OnlineShop.class, shop.getClass());
-        System.out.println("shop object is instance of OnlineShop Class");
     }
 } 
 ```
