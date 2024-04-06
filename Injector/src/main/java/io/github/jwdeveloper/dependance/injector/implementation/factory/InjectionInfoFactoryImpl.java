@@ -120,16 +120,17 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
     }
 
     private Pair<Class<?>, InjectionInfo> ListStrategy(RegistrationInfo info) throws Exception {
-        var _interface = info._interface();
-        if (!Modifier.isInterface(_interface.getModifiers()) || !Modifier.isAbstract(_interface.getModifiers())) {
+        var _listGenericType = info.implementation();
+        if (!Modifier.isInterface(_listGenericType.getModifiers()) ||
+                !Modifier.isAbstract(_listGenericType.getModifiers())) {
             throw new ContainerException(Messages.INJECTION_LIST_ALLOWED_TYPES);
         }
 
         var result = new InjectionInfo();
         result.setRegistrationInfo(info);
-        result.setInjectionKeyType(_interface);
-        result.setInjectionValueType(List.class);
-        return new Pair<>(_interface, result);
+        result.setInjectionKeyType(List.class);
+        result.setInjectionValueType(_listGenericType);
+        return new Pair<>(List.class, result);
     }
 
 
@@ -195,6 +196,10 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         for (var param : constructor.getParameterTypes()) {
             if (param.equals(root)) {
                 throw new DeathCycleException(Messages.INJECTION_DETECTED_CYCLE_DEPENDECY, root.getSimpleName(), current.getSimpleName());
+            }
+            if(param.isInterface())
+            {
+                continue;
             }
             var ctr = getConstructor(param);
             throwIfCycleDependency(ctr, param, root);

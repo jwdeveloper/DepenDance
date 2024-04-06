@@ -125,13 +125,13 @@ public class TutorialDecorator implements DescriptionDecorator {
     private String transformContent(String input)
     {
 
-        var index = input.indexOf("public static void main");
+        var index = input.indexOf("public class");
         if(index == -1)
         {
             return "Main method not found.";
         }
 
-        var lastIndex = input.lastIndexOf("}");
+        var lastIndex = input.lastIndexOf("}")+1;
         var parsed =  input.substring(index,lastIndex);
         return parsed;
     }

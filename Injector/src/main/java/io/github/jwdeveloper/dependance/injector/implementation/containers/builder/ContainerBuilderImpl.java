@@ -25,27 +25,20 @@ package io.github.jwdeveloper.dependance.injector.implementation.containers.buil
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
 import io.github.jwdeveloper.dependance.injector.api.containers.ContainerConfiguration;
 import io.github.jwdeveloper.dependance.injector.api.containers.builders.ContainerBuilder;
-import io.github.jwdeveloper.dependance.injector.api.containers.builders.ContainerBuilderConfiguration;
 import io.github.jwdeveloper.dependance.injector.api.enums.LifeTime;
 import io.github.jwdeveloper.dependance.injector.api.enums.RegistrationType;
-import io.github.jwdeveloper.dependance.injector.api.exceptions.ContainerException;
 import io.github.jwdeveloper.dependance.injector.api.models.RegistrationInfo;
-import io.github.jwdeveloper.dependance.injector.api.search.ContainerSearch;
 import io.github.jwdeveloper.dependance.injector.implementation.containers.ContainerConfigurationImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.containers.DefaultContainer;
 import io.github.jwdeveloper.dependance.injector.implementation.events.EventHandlerImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.factory.InjectionInfoFactoryImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.provider.InstanceProviderImpl;
-import io.github.jwdeveloper.dependance.injector.implementation.search.SearchAgentImpl;
-import lombok.extern.java.Log;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder extends ContainerBuilder<Config,Builder>> implements ContainerBuilder<Config,Builder>{
+public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder extends ContainerBuilder<Config, Builder>> implements ContainerBuilder<Config, Builder> {
     protected final ContainerConfigurationImpl config;
     protected final Logger logger;
 
@@ -54,8 +47,7 @@ public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder
         this.logger = logger;
     }
 
-    public ContainerBuilderImpl()
-    {
+    public ContainerBuilderImpl() {
         this(Logger.getLogger(DefaultContainer.class.getSimpleName()));
     }
 
@@ -104,17 +96,6 @@ public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder
 
 
     @Override
-    public <T> Builder registerList(Class<T> _interface, LifeTime lifeTime) {
-        return registerList(_interface, lifeTime, (x) ->
-        {
-            var container = (ContainerSearch) x;
-            var instances = container.findAllByInterface(_interface);
-            return new ArrayList(instances);
-        });
-    }
-
-
-    @Override
     public <T> Builder registerList(Class<T> _interface, LifeTime lifeTime, Function<Container, Object> provider) {
         config.addRegistration(new RegistrationInfo(
                 List.class,
@@ -127,13 +108,42 @@ public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder
     }
 
     @Override
-    public Builder registerSingletonList(Class<?> _interface) {
-        return registerList(_interface, LifeTime.SINGLETON);
+    public <T> Builder registerSingletonList(Class<T> _interface,  Function<Container, Object> provider) {
+        config.addRegistration(new RegistrationInfo(
+                List.class,
+                _interface,
+                provider,
+                LifeTime.SINGLETON,
+                RegistrationType.List
+        ));
+        return builder();
     }
 
     @Override
-    public Builder registerTransientList(Class<?> _interface) {
-        return registerList(_interface, LifeTime.TRANSIENT);
+    public <T> Builder registerTransientList(Class<T> _interface,  Function<Container, Object> provider) {
+        config.addRegistration(new RegistrationInfo(
+                List.class,
+                _interface,
+                provider,
+                LifeTime.TRANSIENT,
+                RegistrationType.List
+        ));
+        return builder();
+    }
+
+    @Override
+    public Builder registerSingletonList(Class<?> genericType) {
+        return registerList(genericType, LifeTime.SINGLETON);
+    }
+
+    @Override
+    public Builder registerTransientList(Class<?> genericType) {
+        return registerList(genericType, LifeTime.TRANSIENT);
+    }
+
+    @Override
+    public <T> Builder registerList(Class<T> genericType, LifeTime lifeTime) {
+        return registerList(genericType, lifeTime, null);
     }
 
 
@@ -150,12 +160,7 @@ public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder
         return builder();
     }
 
-    private void addRegisteredType(Class<?> type) {
-        if (config.getRegisterdTypes().contains(type)) {
-            throw new ContainerException("Type " + type.getSimpleName() + " has been already registered to container");
-        }
-        config.getRegisterdTypes().add(type);
-    }
+
 
     public <T> Builder registerSingleton(Class<T> _interface, Class<? extends T> implementation) {
         return register(_interface, implementation, LifeTime.SINGLETON);
@@ -175,7 +180,7 @@ public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder
     }
 
     public Builder registerSingleton(Class<?> _interface, Object instance) {
-        return register(_interface, LifeTime.SINGLETON, (x) ->   instance);
+        return register(_interface, LifeTime.SINGLETON, (x) -> instance);
     }
 
     @Override
@@ -188,21 +193,30 @@ public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder
         return register(_interface, LifeTime.TRANSIENT, provider);
     }
 
-
-
     private Builder builder() {
         return (Builder) this;
     }
 
-    public Container build()
-    {
+    private void addRegisteredType(Class<?> type) {
+        config.getRegisterdTypes().add(type);
+    }
+
+    public Container build() {
         var eventHandler = new EventHandlerImpl(config.getEvents());
         var instanceProvider = new InstanceProviderImpl();
         var injectionInfoFactory = new InjectionInfoFactoryImpl();
-        var searchAgent = new SearchAgentImpl();
+
+
+ /*       return new DefaultContainer(
+                searchAgent,
+                instanceProvider,
+                eventHandler,
+                logger,
+                injectionInfoFactory,
+                config.getRegistrations());*/
+
 
         return new DefaultContainer(
-                searchAgent,
                 instanceProvider,
                 eventHandler,
                 logger,

@@ -23,6 +23,7 @@
 package tutorial;
 
 import io.github.jwdeveloper.dependance.Dependance;
+import org.junit.Assert;
 import tutorial.models.*;
 
 
@@ -30,17 +31,13 @@ public class _5_Generic_Types {
 
     public static void main(String[] args) {
 
-        var shopRepository = new Repository<Shop>();
-
         var container = Dependance.newContainer()
-                .registerTransient(ExampleWithGeneric.class)
-                .registerSingleton(Repository.class, shopRepository)
                 .configure(configuration ->
                 {
-                    /**
-                     * Unfortunately since java not allow to define class with generic parameter
-                     * like Repository<MyGenericType>.class
-                     * All cases with generic types (besides lists) must be handled manually in onInjection event
+                    /*
+                     * Since java is not storing information about generic type after compilation
+                     * we can not assign class with generic type to variable, so Repository<MyGenericType>.class is not possible
+                     * Therefor all cases with generic types (besides lists) must be handled manually in onInjection event
                      */
 
                     configuration.onInjection(injection ->
@@ -62,12 +59,16 @@ public class _5_Generic_Types {
                         return new Repository();
                     });
                 })
+
                 .build();
 
 
-        var example = container.find(ExampleWithGeneric.class);
+        //first parameter is class, second one is its generic parameter
         var onlineShopRepo = container.find(Repository.class, OnlineShop.class);
         var localShopRepo = container.find(Repository.class, LocalShop.class);
+
+        Assert.assertNotNull(onlineShopRepo);
+        Assert.assertNotNull(localShopRepo);
     }
 
 

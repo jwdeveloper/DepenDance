@@ -23,4 +23,10 @@
 package tutorial.models;
 
 public class  Repository <T> {
+
+    T obj;
+    public Repository()
+    {
+        System.out.println("Hello from "+this.toString());
+    }
 }

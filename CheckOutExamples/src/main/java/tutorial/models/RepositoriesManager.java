@@ -22,15 +22,16 @@
  */
 package tutorial.models;
 
-public class ExampleWithGeneric
+public class RepositoriesManager
 {
     private final Repository<OnlineShop> onlineShopRepository;
     private final Repository<LocalShop> localShopRepository;
 
-    public ExampleWithGeneric(Repository<OnlineShop> onlineShopRepository,
-                              Repository<LocalShop> localShopRepository) {
+    public RepositoriesManager(Repository<OnlineShop> onlineShopRepository,
+                               Repository<LocalShop> localShopRepository) {
 
         this.onlineShopRepository = onlineShopRepository;
         this.localShopRepository = localShopRepository;
+        System.out.println("Hello from "+this.getClass().getSimpleName());
     }
 }

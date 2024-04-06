@@ -24,16 +24,22 @@ package io.github.jwdeveloper.dependance.implementation.common;
 
 import lombok.Getter;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 
-public class JarScanner extends ClassLoader  {
+public class JarScanner extends ClassLoader {
 
     @Getter
     private final List<Class<?>> classes;
@@ -57,55 +63,59 @@ public class JarScanner extends ClassLoader  {
     }
 
 
-    public void addClasses(Collection<Class<?>> classes)
-    {
+    public void addClasses(Collection<Class<?>> classes) {
         this.classes.addAll(classes);
     }
 
-    protected List<Class<?>> loadClasses(final Class<?> clazz)
-    {
+    protected List<Class<?>> loadClasses(final Class<?> clazz) {
         var source = clazz.getProtectionDomain().getCodeSource();
-        if (source == null)
-            return Collections.emptyList();
+        if (source == null) return Collections.emptyList();
         final var url = source.getLocation();
-        try (final var zip = new ZipInputStream(url.openStream())) {
+        try {
             final List<Class<?>> classes = new ArrayList<>();
-            ZipEntry entry;
-            while ((entry = zip.getNextEntry()) != null) {
-                if (entry.isDirectory())
-                    continue;
-                var name = entry.getName();
-                if (name.startsWith("META-INF"))
-                    continue;
-                if (!name.endsWith(".class"))
-                    continue;
-                name = name.replace('/', '.').substring(0, name.length() - 6);
-                try {
-                    classes.add(Class.forName(name, false, clazz.getClassLoader()));
+            if (url.toString().endsWith(".jar")) {
+                try (final var jar = new JarInputStream(url.openStream())) {
+                    JarEntry entry;
+                    while ((entry = jar.getNextJarEntry()) != null) {
+                        if (entry.isDirectory() || !entry.getName().endsWith(".class")) continue;
+                        var name = entry.getName().replace('/', '.').substring(0, entry.getName().length() - 6);
+                        try {
+                            classes.add(Class.forName(name, false, clazz.getClassLoader()));
+                        } catch (IncompatibleClassChangeError | NoClassDefFoundError | ClassNotFoundException ignored) {
+                        }
+                    }
                 }
-                catch (IncompatibleClassChangeError e)
-                {
-
-                }
-                catch (NoClassDefFoundError | ClassNotFoundException e)
-                {
-                    logger.log(Level.SEVERE," Unable to load class:" + name, e);
-                }
+            } else {
+                var path = Paths.get(url.toURI());
+                Files.walk(path)
+                        .filter(Files::isRegularFile)
+                        .filter(file -> file.toString().endsWith(".class"))
+                        .forEach(file -> {
+                            var name = path.relativize(file).toString();
+                            name = name.replace(File.separatorChar, '.').substring(0, name.length() - 6);
+                            try {
+                                classes.add(Class.forName(name, false, clazz.getClassLoader()));
+                            } catch (IncompatibleClassChangeError | NoClassDefFoundError |
+                                     ClassNotFoundException ignored) {
+                            }
+                        });
             }
             return classes;
-        } catch (IOException e) {
-            logger.log(Level.SEVERE,"Unable load classes from jar file :", e);
+        } catch (IOException | URISyntaxException e) {
+            logger.log(Level.SEVERE, "Unable to load classes:", e);
             return Collections.emptyList();
         }
     }
 
-    public void attacheAllClassesFromPackage(Class<?> clazz)
-    {
+    public void attacheAllClassesFromPackage(Class<?> clazz) {
         classes.addAll(loadClasses(clazz));
-        byInterfaceCatch.clear();;
+        byInterfaceCatch.clear();
+        ;
         byAnnotationCatch.clear();
-        byPackageCatch.clear();;
-        byParentCatch.clear();;
+        byPackageCatch.clear();
+        ;
+        byParentCatch.clear();
+        ;
     }
 
 
@@ -159,7 +169,7 @@ public class JarScanner extends ClassLoader  {
     }
 
     public Collection<Class<?>> findAll() {
-        return  Collections.unmodifiableList(classes);
+        return Collections.unmodifiableList(classes);
     }
 
 }

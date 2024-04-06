@@ -22,6 +22,9 @@
  */
 package tutorial.models;
 
+import io.github.jwdeveloper.dependance.injector.api.annotations.Injection;
+
+@Injection
 public class Config
 {
 

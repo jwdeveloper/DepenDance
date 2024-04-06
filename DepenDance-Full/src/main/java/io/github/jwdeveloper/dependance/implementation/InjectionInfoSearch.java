@@ -24,76 +24,135 @@ package io.github.jwdeveloper.dependance.implementation;
 
 import io.github.jwdeveloper.dependance.api.events.AutoScanEvent;
 import io.github.jwdeveloper.dependance.implementation.common.JarScanner;
+import io.github.jwdeveloper.dependance.implementation.common.JarScannerOptions;
 import io.github.jwdeveloper.dependance.injector.api.annotations.IgnoreInjection;
 import io.github.jwdeveloper.dependance.injector.api.annotations.Injection;
 import io.github.jwdeveloper.dependance.injector.api.containers.builders.ContainerBuilder;
+import io.github.jwdeveloper.dependance.injector.api.exceptions.ContainerException;
 import io.github.jwdeveloper.dependance.injector.implementation.containers.ContainerConfigurationImpl;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class InjectionInfoSearch {
     DependanceContainerBuilder containerBuilder;
     List<Class<?>> toInitializeTypes;
-    Class<?> _package;
+    JarScannerOptions options;
 
-    public InjectionInfoSearch(ContainerBuilder containerBuilder, Class<?> clazz) {
+    public InjectionInfoSearch(ContainerBuilder containerBuilder, JarScannerOptions options) {
         this.containerBuilder = (DependanceContainerBuilder) containerBuilder;
         this.toInitializeTypes = new ArrayList<>();
-        this._package = clazz;
+        this.options = options;
     }
 
     public List<Class<?>> scanAndRegister() {
-        var scanner = new JarScanner(_package, Logger.getLogger(JarScanner.class.getSimpleName()));
-        var classes = scanner.findByAnnotation(Injection.class);
+        var scanner = new JarScanner(options.getRootPackage(), Logger.getLogger(JarScanner.class.getSimpleName()));
 
-        var dependecyContainerConfig = containerBuilder.getDependanceContainerConfiguration();
-        var config = (ContainerConfigurationImpl)dependecyContainerConfig.getConfiguration();
+        var methods = findMethods(scanner.getClasses());
+        var classes = findClasses(scanner.getClasses());
+
+        var containerConfig = containerBuilder.getDependanceContainerConfiguration();
+        var config = (ContainerConfigurationImpl) containerConfig.getConfiguration();
         var registeredTypes = config.getRegisterdTypes();
-        var autoScanEvents= dependecyContainerConfig.getAutoScanEvents();
+        var autoScanEvents = containerConfig.getAutoScanEvents();
         for (var _class : classes) {
-            if (registeredTypes.contains(_class) ||
-                    _class.isAnnotationPresent(IgnoreInjection.class) ||
-                    _class.isInterface()) {
+            if (registeredTypes.contains(_class)) {
                 continue;
             }
             registerType(_class, autoScanEvents);
         }
 
+        for (var method : methods) {
+            if (registeredTypes.contains(method.getReturnType())) {
+                continue;
+            }
+            registerMethod(method, autoScanEvents);
+        }
 
         return toInitializeTypes;
     }
 
-    private void registerType(Class<?> _class, List<Function<AutoScanEvent,Boolean>> autoScanEvents) {
-        var injection = _class.getAnnotation(Injection.class);
-
-        var autoScanEvent  = new AutoScanEvent(_class, containerBuilder, injection);
-        for(var event : autoScanEvents)
-        {
-           var eventResult = event.apply(autoScanEvent);
-           if(!eventResult)
-           {
-               return;
-           }
+    private void registerMethod(Method method, List<Function<AutoScanEvent, Boolean>> autoScanEvents) {
+        var injection = method.getAnnotation(Injection.class);
+        var clazz = method.getReturnType();
+        var autoScanEvent = new AutoScanEvent(clazz, containerBuilder, injection);
+        for (var event : autoScanEvents) {
+            var eventResult = event.apply(autoScanEvent);
+            if (!eventResult) {
+                return;
+            }
         }
 
         if (!injection.lazyLoad())
-            toInitializeTypes.add(_class);
+            toInitializeTypes.add(clazz);
 
-        var interfaces = _class.getInterfaces();
+        method.setAccessible(true);
+        containerBuilder.register(clazz, injection.lifeTime(), container ->
+        {
+            try {
+                var params = new Object[method.getParameterCount()];
+                var i = 0;
+                for (var paramType : method.getParameterTypes()) {
+                    params[i] = container.find(paramType);
+                }
+                return method.invoke(null, params);
+            } catch (Exception e) {
+                throw new ContainerException(e);
+            }
+        });
+    }
+
+    private Set<Method> findMethods(List<Class<?>> classes) {
+        return classes
+                .stream()
+                .flatMap(c -> Arrays.stream(c.getDeclaredMethods()))
+                .filter(e -> Modifier.isStatic(e.getModifiers()) &&
+                        !e.isAnnotationPresent(IgnoreInjection.class) &&
+                        e.isAnnotationPresent(Injection.class))
+                .collect(Collectors.toSet());
+    }
+
+    private Set<Class<?>> findClasses(List<Class<?>> classes) {
+        return classes
+                .stream()
+                .filter(e ->
+                        !e.isInterface() &&
+                                !e.isAnnotationPresent(IgnoreInjection.class) &&
+                                e.isAnnotationPresent(Injection.class))
+                .collect(Collectors.toSet());
+    }
+
+    private void registerType(Class<?> clazz, List<Function<AutoScanEvent, Boolean>> autoScanEvents) {
+        var injection = clazz.getAnnotation(Injection.class);
+        var autoScanEvent = new AutoScanEvent(clazz, containerBuilder, injection);
+        for (var event : autoScanEvents) {
+            var eventResult = event.apply(autoScanEvent);
+            if (!eventResult) {
+                return;
+            }
+        }
+
+        if (!injection.lazyLoad())
+            toInitializeTypes.add(clazz);
+
+        var interfaces = clazz.getInterfaces();
         if (interfaces.length == 0 || injection.ignoreInterface()) {
-            containerBuilder.register(_class, injection.lifeTime());
+            containerBuilder.register(clazz, injection.lifeTime());
             return;
         }
 
         if (injection.toInterface().equals(Object.class)) {
-            containerBuilder.register((Class) interfaces[0], _class, injection.lifeTime());
+            containerBuilder.register((Class) interfaces[0], clazz, injection.lifeTime());
             return;
         }
 
-        containerBuilder.register((Class) injection.toInterface(), _class, injection.lifeTime());
+        containerBuilder.register((Class) injection.toInterface(), clazz, injection.lifeTime());
     }
 }

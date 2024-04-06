@@ -24,29 +24,72 @@ package tutorial;
 
 import io.github.jwdeveloper.dependance.Dependance;
 import io.github.jwdeveloper.dependance.api.DependanceContainer;
-import io.github.jwdeveloper.dependance.exampleClasses.ExampleClass;
+import io.github.jwdeveloper.dependance.injector.api.annotations.Injection;
+import io.github.jwdeveloper.dependance.injector.api.enums.LifeTime;
+import org.junit.Assert;
+import tutorial.models.Config;
+import tutorial.models.ExampleClass;
+import tutorial.models.OnlineShop;
 
 
-public class _6_AutoScan
-{
+public class _6_AutoScan {
+
+    /**
+     *  To avoid boring manually registering Types to container
+     *  use `scan` method that is looking for all Classes and Methods
+     *  with annotation @Injection and register it automatically
+     */
+
     public static void main(String[] args) {
 
+        /*
+         *  package under which code will be scanned should be scanned
+         *  scanner is looking for all Method and Classes that are having @Injection annotation
+         */
+
+        Class<?> rootClass = _6_AutoScan.class;
+
         DependanceContainer container = Dependance.newContainer()
-                .autoRegistration(_6_AutoScan.class)
-                .configure(config ->
-                {
-                    config.onAutoScan(autoScanEvent ->
-                    {
-                       if(autoScanEvent.getTarget().equals(ExampleClass.class))
-                       {
-                           return false;
-                       }
-                       return true;
-                    });
-                })
+                .scan(rootClass)
                 .build();
 
+        Config config = container.find(Config.class);
+        ExampleClass exampleClass = container.find(ExampleClass.class);
+        OnlineShop onlineShop = container.find(OnlineShop.class);
+        ExampleScannClass exampleScannClass = container.find(ExampleScannClass.class);
 
-        container.find(ExampleClass.class);
+        Assert.assertNotNull(config);
+        Assert.assertNotNull(exampleClass);
+        Assert.assertNotNull(onlineShop);
+        Assert.assertNotNull(exampleScannClass);
+    }
+
+
+    /**
+     * This is equivalent of
+     *
+     *     container.registerTransient(OnlineShop.class,container1 ->
+     *                 {
+     *                     System.out.println("Hello from the online shop factory");
+     *                     return new OnlineShop();
+     *                 })
+     */
+    @Injection(lifeTime = LifeTime.TRANSIENT)
+    private static OnlineShop onlineShopFactory() {
+        System.out.println("Hello from the online shop factory");
+        return new OnlineShop();
+    }
+
+
+    /**
+     * This is equivalent of
+     *
+     *     container.registerSingleton(ExampleScannClass.class);
+     */
+    @Injection(lifeTime = LifeTime.SINGLETON)
+    public static class ExampleScannClass {
+        public ExampleScannClass() {
+            System.out.println("Hello world!");
+        }
     }
 }

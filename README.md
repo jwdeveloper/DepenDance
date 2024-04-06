@@ -63,24 +63,27 @@
     <dependency>
         <groupid>com.github.jwdeveloper.DepenDance</groupid>
         <artifactid>DepenDance-Full</artifactid>
-        <version>0.0.3-Release</version>
+        <version>[Replace with current version]</version>
     </dependency>     
 ```
 
 <h1>Examples</h1>
 
+
 ### Basic
 
 ```java
-public static void main(String[] args)
-    {
+public class _1_Basic {
+
+
+    public static void main(String[] args) {
         /*
            - Singleton There will be only one instance of object created by container
            - Transient everytime `container.find` is used new instance of object is created
          */
 
         DependanceContainer container = Dependance.newContainer()
-                .registerTransient(Shop.class, LocalShop.class) //registration interface to class
+                .registerTransient(Shop.class, LocalShop.class) //registration interface to implementation
                 .registerSingleton(Config.class)
                 .registerSingleton(ShopManager.class)
                 .build();
@@ -89,66 +92,86 @@ public static void main(String[] args)
         ShopManager shopManager1 = container.find(ShopManager.class);
         ShopManager shopManager2 = container.find(ShopManager.class);
 
+        Shop shop1 = container.find(Shop.class);
+        Shop shop2 = container.find(Shop.class);
+
+
         Assert.assertEquals(shopManager1, shopManager2);
+        System.out.println("There always same instance of shop manager");
+
         Assert.assertEquals(shopManager1.getConfig(), shopManager2.getConfig());
-        Assert.assertNotEquals(shopManager1.getShop(), shopManager2.getShop());
+        System.out.println("There always same instance of config");
+
+        Assert.assertNotEquals(shop1, shop2);
+        System.out.println("There are different instances of shop");
     }
- 
+} 
 ```
-### AutoScan
+### Object Instances
 
 ```java
-public static void main(String[] args) {
-
+public class _2_Object_Instances
+{
+    public static void main(String[] args)
+    {
+        Config myConfigInstance = new Config();
         DependanceContainer container = Dependance.newContainer()
-                .autoRegistration(_6_AutoScan.class)
-                .configure(config ->
+                .registerSingleton(Config.class, myConfigInstance) //in case we want to make instance manually we can put object as second argument
+                .registerTransient(LocalShop.class,(di)->
                 {
-                    config.onAutoScan(autoScanEvent ->
-                    {
-                       if(autoScanEvent.getTarget().equals(ExampleClass.class))
-                       {
-                           return false;
-                       }
-                       return true;
-                    });
+                    //more complex case, we want to find or put manually arguments to created instance
+                    //for that we can use lamda resolver that has container as input, and object instance as output
+                    var config = (Config)di.find(Config.class);
+                    var shop = new LocalShop(config);
+                    System.out.println("Shop has been created: "+shop);
+                    return shop;
                 })
                 .build();
 
+        Config config = container.find(Config.class);
+        LocalShop shop1 = container.find(LocalShop.class);
+        LocalShop shop2 = container.find(LocalShop.class);
 
-        container.find(ExampleClass.class);
+        Assert.assertEquals(myConfigInstance,config);
+        System.out.println("Config has same instance");
+
+        Assert.assertNotEquals(shop1,shop2);
+        System.out.println("Shops has different instances");
     }
- 
+} 
 ```
-
-
 ### Lists
 
 ```java
-public static void main(String[] args)
-    {
+public class _3_Lists {
+    public static void main(String[] args) {
         DependanceContainer container = Dependance.newContainer()
+                .registerSingleton(Config.class)
                 .registerTransient(Shop.class, OnlineShop.class)
                 .registerTransient(Shop.class, LocalShop.class)
                 .registerTransientList(Shop.class)
                 .build();
 
 
-        List<Shop> shops = (List<Shop>)container.find(List.class,Shop.class);
+        List<Shop> shops = (List<Shop>) container.find(List.class, Shop.class);
 
-        Assert.assertNotEquals(2, shops.size());
-        Assert.assertNotEquals(OnlineShop.class, shops.get(0).getClass());
-        Assert.assertNotEquals(LocalShop.class, shops.get(1).getClass());
+
+        for (var shop : shops) {
+            System.out.println("Shops: " + shop.getClass().getSimpleName());
+        }
+        Assert.assertEquals(2, shops.size());
     }
- 
+
+
+} 
 ```
 ### Events
 
 ```java
-public static void main(String[] args)
-    {
+public class _4_Events {
+    public static void main(String[] args) {
         DependanceContainer container = Dependance.newContainer()
-                .registerSingleton(Shop.class,LocalShop.class)
+                .registerSingleton(Shop.class, LocalShop.class)
                 .registerSingleton(Shop.class, OnlineShop.class)
                 .configure(config ->
                 {
@@ -161,44 +184,40 @@ public static void main(String[] args)
     }
 
 
-    private static Boolean onRegistration(OnRegistrationEvent event)
-    {
-        System.out.println("onRegistration event: "+event.registrationInfo().implementation().getSimpleName());
+    private static Boolean onRegistration(OnRegistrationEvent event) {
+        System.out.println("onRegistration event: " + event.registrationInfo().implementation().getSimpleName());
         return true; //If false `container.find` injection is not registered to container
     }
 
-    private static Object onInjection(OnInjectionEvent event)
-    {
-        var inputType = event.input();
-        var outputObject = event.output(); //If injection has not been found output is null
-        var genericTypes = event.inputGenericParameters();
-        var container = event.container();
+    private static Object onInjection(OnInjectionEvent event) {
+        var inputType = event.input();// searched class type provided as first parameters
+        var genericTypes = event.inputGenericParameters(); //list of generic types provided as second parameter
+        var outputObject = event.output(); //Target object instance type has not been found then output value is null
+        var container = event.container(); //access to DI container
         var injectonMetadata = event.injectionInfo();
 
-        System.out.println("OnInjection input class: "+inputType.getSimpleName());
-        System.out.println("OnInjection output class: "+outputObject.getClass().getSimpleName());
-        System.out.println("OnInjection genericTypes: "+genericTypes.length);
-        System.out.println("OnInjection metadata: "+injectonMetadata.toString());
+        System.out.println("OnInjection input class: " + inputType.getSimpleName());
+        System.out.println("OnInjection output class: " + outputObject.getClass().getSimpleName());
+        System.out.println("OnInjection genericTypes: " + genericTypes.length);
+        System.out.println("OnInjection metadata: " + injectonMetadata.toString());
         return outputObject;
     }
- 
+} 
 ```
 ### Generic Types
 
 ```java
-public static void main(String[] args) {
+public class _5_Generic_Types {
 
-        var shopRepository = new Repository<Shop>();
+    public static void main(String[] args) {
 
         var container = Dependance.newContainer()
-                .registerTransient(ExampleWithGeneric.class)
-                .registerSingleton(Repository.class, shopRepository)
                 .configure(configuration ->
                 {
-                    /**
-                     * Unfortunately since java not allow to define class with generic parameter
-                     * like Repository<MyGenericType>.class
-                     * All cases with generic types (besides lists) must be handled manually in onInjection event
+                    /*
+                     * Since java is not storing information about generic type after compilation
+                     * we can not assign class with generic type to variable, so Repository<MyGenericType>.class is not possible
+                     * Therefor all cases with generic types (besides lists) must be handled manually in onInjection event
                      */
 
                     configuration.onInjection(injection ->
@@ -220,41 +239,152 @@ public static void main(String[] args) {
                         return new Repository();
                     });
                 })
+
                 .build();
 
 
-        var example = container.find(ExampleWithGeneric.class);
+        //first parameter is class, second one is its generic parameter
         var onlineShopRepo = container.find(Repository.class, OnlineShop.class);
         var localShopRepo = container.find(Repository.class, LocalShop.class);
+
+        Assert.assertNotNull(onlineShopRepo);
+        Assert.assertNotNull(localShopRepo);
     }
 
 
- 
+} 
 ```
-### Object Instances
+### AutoScan
 
 ```java
-public static void main(String[] args)
-    {
-        Config myConfigInstance = new Config();
+public class _6_AutoScan {
+
+    /**
+     *  To avoid boring manually registering Types to container
+     *  use `scan` method that is looking for all Classes and Methods
+     *  with annotation @Injection and register it automatically
+     */
+
+    public static void main(String[] args) {
+
+        /*
+         *  package under which code will be scanned should be scanned
+         *  scanner is looking for all Method and Classes that are having @Injection annotation
+         */
+
+        Class<?> rootClass = _6_AutoScan.class;
+
         DependanceContainer container = Dependance.newContainer()
-                .registerSingleton(Config.class, myConfigInstance)
-                .registerTransient(LocalShop.class,(e)->
-                {
-                    var config = (Config)e.find(Config.class);
-                    var shop = new LocalShop(config);
-                    System.out.println("Shop has been created: "+shop);
-                    return shop;
-                })
+                .scan(rootClass)
                 .build();
 
-
         Config config = container.find(Config.class);
-        LocalShop shop1 = container.find(LocalShop.class);
-        LocalShop shop2 = container.find(LocalShop.class);
+        ExampleClass exampleClass = container.find(ExampleClass.class);
+        OnlineShop onlineShop = container.find(OnlineShop.class);
+        ExampleScannClass exampleScannClass = container.find(ExampleScannClass.class);
 
-        Assert.assertEquals(myConfigInstance, config);
-        Assert.assertNotEquals(shop1, shop2);
+        Assert.assertNotNull(config);
+        Assert.assertNotNull(exampleClass);
+        Assert.assertNotNull(onlineShop);
+        Assert.assertNotNull(exampleScannClass);
     }
- 
+
+
+    /**
+     * This is equivalent of
+     *
+     *     container.registerTransient(OnlineShop.class,container1 ->
+     *                 {
+     *                     System.out.println("Hello from the online shop factory");
+     *                     return new OnlineShop();
+     *                 })
+     */
+    @Injection(lifeTime = LifeTime.TRANSIENT)
+    private static OnlineShop onlineShopFactory() {
+        System.out.println("Hello from the online shop factory");
+        return new OnlineShop();
+    }
+
+
+    /**
+     * This is equivalent of
+     *
+     *     container.registerSingleton(ExampleScannClass.class);
+     */
+    @Injection(lifeTime = LifeTime.SINGLETON)
+    public static class ExampleScannClass {
+        public ExampleScannClass() {
+            System.out.println("Hello world!");
+        }
+    }
+} 
+```
+### Overriding
+
+```java
+public class _7_Overriding {
+    public static void main(String[] args) {
+
+        DependanceContainer container = Dependance.newContainer()
+                .registerTransient(Shop.class, OnlineShop.class)
+                .registerTransient(Shop.class, OfflineShop.class)
+
+                /**
+                 * By again declaring Shop but with different implementation (OnlineShop)
+                 * We are telling container to Override (OfflineShop) and always returns (OnlineShop)
+                 */
+                .build();
+
+        Shop shop = container.find(Shop.class);
+        Assert.assertEquals(OnlineShop.class, shop.getClass());
+        System.out.println("shop object is instance of OnlineShop Class");
+    }
+} 
+```
+### ManyConstructors
+
+```java
+public class _8_ManyConstructors
+{
+    /**
+     *  By the default the first constructor is always targeted for injecting parameters
+     *  However, sometimes class can have more than one constructor, or we want to use
+     *  specific one.
+     *
+     *  To do that use @Inject annotation over wanted constructor
+     *
+     */
+
+    public static void main(String[] args) {
+
+        DependanceContainer container = Dependance.newContainer()
+                .registerTransient(ExampleClass.class)
+                .registerTransient(ManyConstructorsExample.class)
+                .build();
+
+        ManyConstructorsExample example = container.find(ManyConstructorsExample.class);
+        Assert.assertNotNull(example);
+        System.out.println("It works!");
+    }
+
+    public static class ManyConstructorsExample
+    {
+
+        public ManyConstructorsExample(String a, int b, boolean c)
+        {
+
+        }
+
+        @Inject
+        public ManyConstructorsExample(ExampleClass c)
+        {
+            System.out.println("Hello from constructor with ExampleClass parameter");
+        }
+    }
+
+    public static class ExampleClass
+    {
+
+    }
+} 
 ```

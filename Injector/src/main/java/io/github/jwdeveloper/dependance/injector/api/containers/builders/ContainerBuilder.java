@@ -31,7 +31,7 @@ import io.github.jwdeveloper.dependance.injector.implementation.containers.Conta
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public interface ContainerBuilder<Config extends ContainerConfiguration,  Builder extends ContainerBuilder<Config,Builder>> {
+public interface ContainerBuilder<Config extends ContainerConfiguration, Builder extends ContainerBuilder<Config, Builder>> {
 
     Builder configure(Consumer<Config> configuration);
 
@@ -44,12 +44,15 @@ public interface ContainerBuilder<Config extends ContainerConfiguration,  Builde
     <T> Builder register(Class<T> _interface, LifeTime lifeTime, Function<Container, Object> provider);
 
     <T> Builder registerList(Class<T> _interface, LifeTime lifeTime);
-
-    <T> Builder registerList(Class<T> _interface, LifeTime lifeTime, Function<Container, Object> provider);
-
     Builder registerSingletonList(Class<?> _interface);
 
     Builder registerTransientList(Class<?> _interface);
+
+    <T> Builder registerList(Class<T> _interface, LifeTime lifeTime, Function<Container, Object> provider);
+
+    <T> Builder registerSingletonList(Class<T> _interface, Function<Container, Object> provider);
+
+    <T> Builder registerTransientList(Class<T> _interface, Function<Container, Object> provider);
 
     Builder registerSingleton(Class<?> _class);
 
@@ -60,6 +63,7 @@ public interface ContainerBuilder<Config extends ContainerConfiguration,  Builde
     <T> Builder registerTransient(Class<T> _interface, Class<? extends T> implementation);
 
     Builder registerSingleton(Class<?> _interface, Object instance);
+
     Builder registerSingleton(Class<?> _interface, Function<Container, Object> provider);
 
     Builder registerTransient(Class<?> _interface, Function<Container, Object> provider);

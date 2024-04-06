@@ -31,5 +31,6 @@ public class LocalShop implements Shop {
     public LocalShop(Config config)
     {
         this.config = config;
+        System.out.println("Hello from "+this.getClass().getSimpleName());
     }
 }

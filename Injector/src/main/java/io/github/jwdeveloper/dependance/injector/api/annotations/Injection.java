@@ -31,22 +31,23 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
-public @interface Injection
-{
-    /*
-     LifeTime:
-         Singletone -> there will be only one instance of an object in Dependency Injection
-         Transient -> every time object is need new instance is created
-   */
+@Target({ElementType.TYPE, ElementType.METHOD})
+public @interface Injection {
+    /**
+     * LifeTime:
+     * SINGLETON -> there will be only one instance of an object in Dependency Injection
+     * TRANSIENT -> every time object is need new instance is created
+     */
     LifeTime lifeTime() default LifeTime.SINGLETON;
 
-    /*
-       Lazy load:
-           true: -> object is initialized after calling it from Dependency Injection container
-           false: ->  object is initialized when application starts
+    /**
+     * Lazy load:
+     * true: -> object is initialized after calling it from Dependency Injection container
+     * false: ->  object is imminently created after container is build
      */
     boolean lazyLoad() default true;
+
     boolean ignoreInterface() default true;
+
     Class<?> toInterface() default Object.class;
 }

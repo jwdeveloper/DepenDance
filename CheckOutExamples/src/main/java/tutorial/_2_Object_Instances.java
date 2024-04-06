@@ -34,22 +34,26 @@ public class _2_Object_Instances
     {
         Config myConfigInstance = new Config();
         DependanceContainer container = Dependance.newContainer()
-                .registerSingleton(Config.class, myConfigInstance)
-                .registerTransient(LocalShop.class,(e)->
+                .registerSingleton(Config.class, myConfigInstance) //in case we want to make instance manually we can put object as second argument
+                .registerTransient(LocalShop.class,(di)->
                 {
-                    var config = (Config)e.find(Config.class);
+                    //more complex case, we want to find or put manually arguments to created instance
+                    //for that we can use lamda resolver that has container as input, and object instance as output
+                    var config = (Config)di.find(Config.class);
                     var shop = new LocalShop(config);
                     System.out.println("Shop has been created: "+shop);
                     return shop;
                 })
                 .build();
 
-
         Config config = container.find(Config.class);
         LocalShop shop1 = container.find(LocalShop.class);
         LocalShop shop2 = container.find(LocalShop.class);
 
-        Assert.assertEquals(myConfigInstance, config);
-        Assert.assertNotEquals(shop1, shop2);
+        Assert.assertEquals(myConfigInstance,config);
+        System.out.println("Config has same instance");
+
+        Assert.assertNotEquals(shop1,shop2);
+        System.out.println("Shops has different instances");
     }
 }

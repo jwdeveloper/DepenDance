@@ -30,16 +30,20 @@ import tutorial.models.ShopManager;
 import io.github.jwdeveloper.dependance.Dependance;
 import org.junit.Assert;
 
+import java.util.List;
+import java.util.Map;
+
 public class _1_Basic {
-    public static void main(String[] args)
-    {
+
+
+    public static void main(String[] args) {
         /*
            - Singleton There will be only one instance of object created by container
            - Transient everytime `container.find` is used new instance of object is created
          */
 
         DependanceContainer container = Dependance.newContainer()
-                .registerTransient(Shop.class, LocalShop.class) //registration interface to class
+                .registerTransient(Shop.class, LocalShop.class) //registration interface to implementation
                 .registerSingleton(Config.class)
                 .registerSingleton(ShopManager.class)
                 .build();
@@ -48,8 +52,17 @@ public class _1_Basic {
         ShopManager shopManager1 = container.find(ShopManager.class);
         ShopManager shopManager2 = container.find(ShopManager.class);
 
+        Shop shop1 = container.find(Shop.class);
+        Shop shop2 = container.find(Shop.class);
+
+
         Assert.assertEquals(shopManager1, shopManager2);
+        System.out.println("There always same instance of shop manager");
+
         Assert.assertEquals(shopManager1.getConfig(), shopManager2.getConfig());
-        Assert.assertNotEquals(shopManager1.getShop(), shopManager2.getShop());
+        System.out.println("There always same instance of config");
+
+        Assert.assertNotEquals(shop1, shop2);
+        System.out.println("There are different instances of shop");
     }
 }

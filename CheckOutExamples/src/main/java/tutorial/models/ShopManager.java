@@ -22,6 +22,7 @@
  */
 package tutorial.models;
 
+import io.github.jwdeveloper.dependance.injector.api.annotations.Inject;
 import lombok.Getter;
 
 @Getter
@@ -30,6 +31,7 @@ public class ShopManager
     private final Config config;
     private final Shop shop;
 
+    @Inject
     public ShopManager(Config config, Shop shop)
     {
         this.config = config;

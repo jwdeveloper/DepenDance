@@ -26,6 +26,7 @@ import io.github.jwdeveloper.dependance.api.DependanceContainer;
 import io.github.jwdeveloper.dependance.api.DependanceContainerConfiguration;
 import io.github.jwdeveloper.dependance.decorator.api.builder.DecoratorBuilder;
 import io.github.jwdeveloper.dependance.decorator.implementation.DecoratorBuilderImpl;
+import io.github.jwdeveloper.dependance.implementation.common.JarScannerOptions;
 import io.github.jwdeveloper.dependance.injector.implementation.containers.builder.ContainerBuilderImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.factory.InjectionInfoFactoryImpl;
 import lombok.Getter;
@@ -36,7 +37,8 @@ import java.util.function.Consumer;
 public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceContainerConfiguration, DependanceContainerBuilder> {
 
     private final DecoratorBuilder decoratorBuilder;
-    private Class<?> autoRegistrationRoot;
+    private final JarScannerOptions options;
+    private boolean scanEnabled;
 
     @Getter
     private final DependanceContainerConfigurationImpl dependanceContainerConfiguration;
@@ -44,6 +46,7 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
     public DependanceContainerBuilder() {
         super();
         this.decoratorBuilder = new DecoratorBuilderImpl(new InjectionInfoFactoryImpl(), new HashMap<>());
+        this.options = new JarScannerOptions();
         dependanceContainerConfiguration = new DependanceContainerConfigurationImpl(this.getConfiguration());
     }
 
@@ -58,29 +61,35 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
         return this;
     }
 
-    public DependanceContainerBuilder autoRegistration(Class<?> root) {
-        autoRegistrationRoot = root;
+    public DependanceContainerBuilder scan(Class<?> root) {
+        return scan(x ->
+        {
+           x.setRootPackage(root);
+        });
+    }
+
+    public DependanceContainerBuilder scan(Consumer<JarScannerOptions> consumer) {
+        consumer.accept(options);
+        scanEnabled = true;
         return this;
     }
+
 
     @Override
     public DependanceContainer build() {
         var decorator = decoratorBuilder.build();
         configure(config -> config.onEvent(decorator));
 
-
-        if (autoRegistrationRoot == null) {
+        if (!scanEnabled) {
             return new DepenDanceContainerImpl(super.build());
         }
 
-        var search = new InjectionInfoSearch(this, autoRegistrationRoot);
+        var search = new InjectionInfoSearch(this, options);
         var toInitialize = search.scanAndRegister();
         var container = super.build();
         for (var clazz : toInitialize) {
             container.find(clazz);
         }
         return new DepenDanceContainerImpl(container);
-
-
     }
 }

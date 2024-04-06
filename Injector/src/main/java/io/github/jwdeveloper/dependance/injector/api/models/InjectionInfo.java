@@ -33,7 +33,6 @@ import java.util.Set;
 public class InjectionInfo
 {
      private Class<?> injectionKeyType;
-
      private Class<?> injectionValueType;
      private RegistrationInfo registrationInfo;
      private Class<?>[] constructorTypes;

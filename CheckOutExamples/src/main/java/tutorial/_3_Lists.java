@@ -23,6 +23,9 @@
 package tutorial;
 
 import io.github.jwdeveloper.dependance.api.DependanceContainer;
+import io.github.jwdeveloper.dependance.injector.api.annotations.Inject;
+import io.github.jwdeveloper.dependance.injector.api.annotations.Injection;
+import tutorial.models.Config;
 import tutorial.models.LocalShop;
 import tutorial.models.OnlineShop;
 import tutorial.models.Shop;
@@ -31,21 +34,24 @@ import org.junit.Assert;
 
 import java.util.List;
 
-public class _3_Lists
-{
-    public static void main(String[] args)
-    {
+public class _3_Lists {
+    public static void main(String[] args) {
         DependanceContainer container = Dependance.newContainer()
+                .registerSingleton(Config.class)
                 .registerTransient(Shop.class, OnlineShop.class)
                 .registerTransient(Shop.class, LocalShop.class)
                 .registerTransientList(Shop.class)
                 .build();
 
 
-        List<Shop> shops = (List<Shop>)container.find(List.class,Shop.class);
+        List<Shop> shops = (List<Shop>) container.find(List.class, Shop.class);
 
-        Assert.assertNotEquals(2, shops.size());
-        Assert.assertNotEquals(OnlineShop.class, shops.get(0).getClass());
-        Assert.assertNotEquals(LocalShop.class, shops.get(1).getClass());
+
+        for (var shop : shops) {
+            System.out.println("Shops: " + shop.getClass().getSimpleName());
+        }
+        Assert.assertEquals(2, shops.size());
     }
+
+
 }

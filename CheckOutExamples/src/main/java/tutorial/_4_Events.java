@@ -30,12 +30,10 @@ import tutorial.models.OnlineShop;
 import tutorial.models.Shop;
 import io.github.jwdeveloper.dependance.Dependance;
 
-public class _4_Events
-{
-    public static void main(String[] args)
-    {
+public class _4_Events {
+    public static void main(String[] args) {
         DependanceContainer container = Dependance.newContainer()
-                .registerSingleton(Shop.class,LocalShop.class)
+                .registerSingleton(Shop.class, LocalShop.class)
                 .registerSingleton(Shop.class, OnlineShop.class)
                 .configure(config ->
                 {
@@ -48,24 +46,22 @@ public class _4_Events
     }
 
 
-    private static Boolean onRegistration(OnRegistrationEvent event)
-    {
-        System.out.println("onRegistration event: "+event.registrationInfo().implementation().getSimpleName());
+    private static Boolean onRegistration(OnRegistrationEvent event) {
+        System.out.println("onRegistration event: " + event.registrationInfo().implementation().getSimpleName());
         return true; //If false `container.find` injection is not registered to container
     }
 
-    private static Object onInjection(OnInjectionEvent event)
-    {
-        var inputType = event.input();
-        var outputObject = event.output(); //If injection has not been found output is null
-        var genericTypes = event.inputGenericParameters();
-        var container = event.container();
+    private static Object onInjection(OnInjectionEvent event) {
+        var inputType = event.input();// searched class type provided as first parameters
+        var genericTypes = event.inputGenericParameters(); //list of generic types provided as second parameter
+        var outputObject = event.output(); //Target object instance type has not been found then output value is null
+        var container = event.container(); //access to DI container
         var injectonMetadata = event.injectionInfo();
 
-        System.out.println("OnInjection input class: "+inputType.getSimpleName());
-        System.out.println("OnInjection output class: "+outputObject.getClass().getSimpleName());
-        System.out.println("OnInjection genericTypes: "+genericTypes.length);
-        System.out.println("OnInjection metadata: "+injectonMetadata.toString());
+        System.out.println("OnInjection input class: " + inputType.getSimpleName());
+        System.out.println("OnInjection output class: " + outputObject.getClass().getSimpleName());
+        System.out.println("OnInjection genericTypes: " + genericTypes.length);
+        System.out.println("OnInjection metadata: " + injectonMetadata.toString());
         return outputObject;
     }
 }
