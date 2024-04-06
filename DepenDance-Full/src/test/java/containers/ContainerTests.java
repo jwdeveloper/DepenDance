@@ -22,14 +22,14 @@
  */
 package containers;
 
-import common.ContainerTest;
+import common.ContainerTestBase;
 import common.classess.*;
 import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.List;
 
-public class ContainerTests extends ContainerTest {
+public class ContainerTests extends ContainerTestBase {
 
 
     @Test

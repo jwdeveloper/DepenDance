@@ -22,7 +22,7 @@
  */
 package containers;
 
-import common.ContainerTest;
+import common.ContainerTestBase;
 import common.classess.ExampleClass;
 import common.classess.exceptionsExamples.ClassWithMoreConstructors;
 import common.classess.exceptionsExamples.ClassWithParamterNotRegistered;
@@ -37,7 +37,7 @@ import io.github.jwdeveloper.dependance.injector.implementation.utilites.Message
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ContainerExceptionsTests extends ContainerTest {
+public class ContainerExceptionsTests extends ContainerTestBase {
     @Test
     public void shouldReturnNullWhenNotRegistered() {
         shouldThrows(InjectionNotFoundException.class, () ->

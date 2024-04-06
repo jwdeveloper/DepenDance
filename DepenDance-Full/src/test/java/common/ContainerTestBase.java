@@ -30,7 +30,7 @@ import org.junit.Assert;
 import org.junit.Before;
 
 
-public abstract class ContainerTest {
+public abstract class ContainerTestBase {
     public static DependanceContainerBuilder builder;
 
     @Before
@@ -74,7 +74,7 @@ public abstract class ContainerTest {
         }
         catch (Exception e)
         {
-            if(throwablClass.equals(throwablClass.getClass()))
+            if(throwablClass.equals(e.getClass()))
             {
                 return;
             }

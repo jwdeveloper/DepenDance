@@ -22,18 +22,18 @@
  */
 package containers;
 
-import common.ContainerTest;
+import common.ContainerTestBase;
 import common.classess.*;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ContainerSearchTests extends ContainerTest {
+public class ContainerSearchTests extends ContainerTestBase {
     @Test
     public void ShouldFindByClassesCommonInterface()  {
         //Arrange
         var container = builder
-                .registerSingleton(ExampleInterface.class, ExampleClass.class)
-                .registerSingleton(ExampleInterfaceV2.class, ExampleClassV2.class)
+                .registerSingleton(ExampleCommonInterface.class, ExampleClass.class)
+                .registerSingleton(ExampleCommonInterface.class, ExampleClassV2.class)
                 .build();
 
         //Act
