@@ -48,7 +48,19 @@
 
 </div>
 
-lightweight dependency injection container that is both small and performance efficient
+Lightweight dependency injection container that is both small and performance efficient
+
+### Features 
+
+- [x] Injecting object via constructor
+- [x] Class Scannner to avoid manual registraton  [Scanner](#autoscan)
+- [x] Register Lists
+- [x] Register object instances
+- [x] Object lifetimes [SINGLETON, TRANSIENT]
+- [x] Generic types
+- [x] Many constructors
+- [x] Customizable, you can customize container with buildin events system 
+
 <h1>Installation</h1>
 
 
