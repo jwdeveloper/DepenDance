@@ -33,8 +33,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarInputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -47,9 +45,7 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
     private final List<Class<?>> classes;
 
     private final Map<Class<?>, List<Class<?>>> byInterfaceCache;
-
     private final Map<Class<?>, List<Class<?>>> byParentCache;
-
     private final Map<Package, List<Class<?>>> byPackageCache;
     private final Map<Class<? extends Annotation>, List<Class<?>>> byAnnotationCache;
     private final Logger logger;
@@ -58,7 +54,7 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
     public JarScannerImpl(JarScannerOptions options, Logger logger) {
         this.logger = logger;
         this.options = options;
-        classes = loadClasses(options.getRootPackage());
+        classes = loadClasses();
         byInterfaceCache = new IdentityHashMap<>();
         byParentCache = new IdentityHashMap<>();
         byPackageCache = new IdentityHashMap<>();
@@ -70,21 +66,29 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
         this.classes.addAll(classes);
     }
 
-    protected List<Class<?>> loadClasses(Class<?> clazz) {
-        var source = clazz.getProtectionDomain().getCodeSource();
-        if (source == null)
-            return Collections.emptyList();
-        final var url = source.getLocation();
+    protected List<Class<?>> loadClasses() {
+        var result = new ArrayList<Class<?>>(options.getIncludedClasses());
+        var packagesToScan = new ArrayList<>(options.getIncludedPackages());
+        packagesToScan.add(options.getRootPackage());
         try {
-            if (url.toString().endsWith(".jar"))
-                return loadClassesFromZip(clazz);
-            else
-                return loadClassesFromFolder(url, clazz);
+            for (var packagee : packagesToScan) {
+                var source = packagee.getProtectionDomain().getCodeSource();
+                if (source == null) {
+                    throw new RuntimeException("Code source not found for class " + packagee.getName());
+                }
+                var url = source.getLocation();
 
-        } catch (IOException | URISyntaxException e) {
+                if (url.toString().endsWith(".jar"))
+                    result.addAll(loadClassesFromZip(packagee));
+                else
+                    result.addAll(loadClassesFromFolder(url, packagee));
+            }
+        } catch (IOException | URISyntaxException e)
+        {
             logger.log(Level.SEVERE, "Unable to load classes:", e);
             return Collections.emptyList();
         }
+        return result;
     }
 
 
@@ -103,16 +107,11 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
                 if (!name.endsWith(".class"))
                     continue;
                 name = name.replace('/', '.').substring(0, name.length() - 6);
-                if (!validateName(name)) {
+                var optional = handleSingleClass(name, clazz.getClassLoader());
+                if (optional.isEmpty()) {
                     continue;
                 }
-                try {
-                    classes.add(Class.forName(name, false, clazz.getClassLoader()));
-                } catch (IncompatibleClassChangeError e) {
-
-                } catch (NoClassDefFoundError | ClassNotFoundException e) {
-                    // logger.error("Unable to load class:" + name, e);
-                }
+                classes.add(optional.get());
             }
             return classes;
         } catch (IOException e) {
@@ -120,46 +119,61 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
         }
     }
 
-    private List<Class<?>> loadClassesFromFolder(URL url, Class<?> clazz) throws URISyntaxException, IOException {
-
-        var path = Paths.get(url.toURI());
+    private List<Class<?>> loadClassesFromFolder(URL url, Class<?> targetPackage) throws URISyntaxException, IOException {
+        var packagePath = targetPackage.getPackage().getName().replace('.', File.separatorChar);
+        var basePath = Paths.get(url.toURI());
+        var targetPath = basePath.resolve(packagePath);
         var classes = new ArrayList<Class<?>>();
-        Files.walk(path)
+        Files.walk(targetPath)
                 .filter(Files::isRegularFile)
                 .filter(file -> file.toString().endsWith(".class"))
-                .forEach(file ->
-                {
-                    var name = path.relativize(file).toString();
-                    name = name.replace(File.separatorChar, '.').substring(0, name.length() - 6);
-                    if (!validateName(name)) {
+                .forEach(file -> {
+                    var relativePath = basePath.relativize(file).toString();
+                    var className = relativePath.replace(File.separatorChar, '.').substring(0, relativePath.length() - 6);
+                    if (!className.startsWith(targetPackage.getPackage().getName())) {
                         return;
                     }
-                    try {
-                        classes.add(Class.forName(name, false, clazz.getClassLoader()));
-                    } catch (IncompatibleClassChangeError | NoClassDefFoundError |
-                             ClassNotFoundException ignored) {
+                    var optional = handleSingleClass(className, targetPackage.getClassLoader());
+                    if (optional.isEmpty()) {
+                        return;
                     }
+                    classes.add(optional.get());
                 });
         return classes;
     }
 
-    private boolean validateName(String name) {
 
-        if (options.getExcludedClasses().contains(name)) {
-            return false;
+    private Optional<Class<?>> handleSingleClass(String className, ClassLoader classLoader) {
+
+        if (options.getExcludedClasses().contains(className)) {
+            return Optional.empty();
         }
-        if (options.getExcludedPackages().contains(name)) {
-            return false;
+        if (options.getExcludedPackages().contains(toPackageName(className))) {
+            return Optional.empty();
         }
-        return true;
+        try {
+            var clazz = Class.forName(className, false, classLoader);
+            return Optional.of(clazz);
+        } catch (IncompatibleClassChangeError | NoClassDefFoundError | ClassNotFoundException ignored) {
+            return Optional.empty();
+        }
+    }
+
+    public String toPackageName(String classFullName) {
+        int lastDotIndex = classFullName.lastIndexOf('.');
+        if (lastDotIndex == -1) {
+            return ""; // No package name
+        }
+        return classFullName.substring(0, lastDotIndex);
     }
 
     public void attacheAllClassesFromPackage(Class<?> clazz) {
-        classes.addAll(loadClasses(clazz));
+        options.includePackage(clazz);
         byInterfaceCache.clear();
         byAnnotationCache.clear();
         byPackageCache.clear();
         byParentCache.clear();
+        loadClasses();
     }
 
 
@@ -238,8 +252,7 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
             }
             type = type.getSuperclass();
 
-            if(type == null)
-            {
+            if (type == null) {
                 return false;
             }
             if (type.equals(Object.class)) {

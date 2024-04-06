@@ -2,22 +2,24 @@ package io.github.jwdeveloper.dependance.implementation.common;
 
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 
 
 @Getter
 public class JarScannerOptions {
     private Class<?> rootPackage;
-    private Set<String> excludedPackages;
-    private Set<String> excludedClasses;
+    private final Set<Class<?>> includedPackages;
+    private final Set<Class<?>> includedClasses;
+    private final Set<String> excludedPackages;
+    private final Set<String> excludedClasses;
 
 
     public JarScannerOptions() {
         this.excludedPackages = new HashSet<>();
         this.excludedClasses = new HashSet<>();
+        this.includedClasses = new HashSet<>();
+        this.includedPackages = new HashSet<>();
     }
 
     public void setRootPackage(Class<?> rootPackage) {
@@ -25,19 +27,27 @@ public class JarScannerOptions {
     }
 
 
-    public void addExcludedClass(String packageName) {
+    public void includeClass(Class<?> clazz) {
+        includedClasses.add(clazz);
+    }
+
+    public void includePackage(Class<?> packagee) {
+        includedPackages.add(packagee);
+    }
+
+    public void excludeClass(String packageName) {
         excludedClasses.add(packageName);
     }
 
-    public void addExcludedClass(Class<?> packageName) {
-        excludedClasses.add(packageName.getPackageName());
+    public void excludeClass(Class<?> packageName) {
+        excludedClasses.add(packageName.getName());
     }
 
-    public void addExcludePackage(String packageName) {
+    public void excludePackage(String packageName) {
         excludedPackages.add(packageName);
     }
 
-    public void addExcludePackage(Class<?> packageName) {
+    public void excludePackage(Class<?> packageName) {
         excludedPackages.add(packageName.getPackageName());
     }
 }

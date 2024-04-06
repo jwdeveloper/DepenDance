@@ -24,6 +24,7 @@ package io.github.jwdeveloper.dependance.implementation;
 
 import io.github.jwdeveloper.dependance.api.DependanceContainer;
 import io.github.jwdeveloper.dependance.api.DependanceContainerConfiguration;
+import io.github.jwdeveloper.dependance.api.JarScanner;
 import io.github.jwdeveloper.dependance.decorator.api.builder.DecoratorBuilder;
 import io.github.jwdeveloper.dependance.decorator.implementation.DecoratorBuilderImpl;
 import io.github.jwdeveloper.dependance.implementation.common.JarScannerOptions;
@@ -38,6 +39,7 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
 
     private final DecoratorBuilder decoratorBuilder;
     private final JarScannerOptions options;
+    private JarScanner jarScanner;
     private boolean scanEnabled;
 
     @Getter
@@ -64,13 +66,19 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
     public DependanceContainerBuilder scan(Class<?> root) {
         return scan(x ->
         {
-           x.setRootPackage(root);
+            x.setRootPackage(root);
         });
     }
 
     public DependanceContainerBuilder scan(Consumer<JarScannerOptions> consumer) {
         consumer.accept(options);
         scanEnabled = true;
+        return this;
+    }
+
+    public DependanceContainerBuilder scan(JarScanner jarScanner) {
+        scanEnabled = true;
+        this.jarScanner = jarScanner;
         return this;
     }
 
@@ -84,7 +92,7 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
             return new DepenDanceContainerImpl(super.build());
         }
 
-        var scanner = new InjectionsScanner(this, options);
+        var scanner = new InjectionsScanner(this, options, jarScanner);
         var toInitialize = scanner.scanAndRegister();
         var container = super.build();
         for (var clazz : toInitialize) {

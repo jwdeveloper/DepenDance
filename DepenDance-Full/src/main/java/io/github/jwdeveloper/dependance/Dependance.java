@@ -26,6 +26,8 @@ import io.github.jwdeveloper.dependance.api.JarScanner;
 import io.github.jwdeveloper.dependance.implementation.DependanceContainerBuilder;
 import io.github.jwdeveloper.dependance.implementation.common.JarScannerImpl;
 import io.github.jwdeveloper.dependance.implementation.common.JarScannerOptions;
+
+import java.util.function.Consumer;
 import java.util.logging.Logger;
 
 public class Dependance {
@@ -35,5 +37,25 @@ public class Dependance {
 
     public static JarScanner newJarScanner(JarScannerOptions options, Logger logger) {
         return new JarScannerImpl(options, logger);
+    }
+
+    public static JarScanner newJarScanner(JarScannerOptions options)
+    {
+        return new JarScannerImpl(options, Logger.getLogger(Dependance.class.getSimpleName()));
+    }
+
+    public static JarScanner newJarScanner(Class<?> targetPackage)
+    {
+        return newJarScanner(e ->
+        {
+            e.setRootPackage(targetPackage);
+        });
+    }
+
+    public static JarScanner newJarScanner(Consumer<JarScannerOptions> consumer)
+    {
+        var options = new JarScannerOptions();
+        consumer.accept(options);
+        return new JarScannerImpl(options, Logger.getLogger(Dependance.class.getSimpleName()));
     }
 }

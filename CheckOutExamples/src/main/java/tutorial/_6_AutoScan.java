@@ -54,8 +54,8 @@ public class _6_AutoScan {
                 .scan(options ->
                 {
                     options.setRootPackage(rootClass);
-                    options.addExcludedClass("org.example.ExampleClass");
-                    options.addExcludePackage(String.class.getPackageName());
+                    options.excludeClass("org.example.ExampleClass");
+                    options.excludePackage(String.class.getPackageName());
                 })
                 .build();
 

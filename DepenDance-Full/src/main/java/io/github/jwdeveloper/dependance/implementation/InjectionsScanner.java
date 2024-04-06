@@ -22,6 +22,7 @@
  */
 package io.github.jwdeveloper.dependance.implementation;
 
+import io.github.jwdeveloper.dependance.api.JarScanner;
 import io.github.jwdeveloper.dependance.api.events.AutoScanEvent;
 import io.github.jwdeveloper.dependance.implementation.common.JarScannerImpl;
 import io.github.jwdeveloper.dependance.implementation.common.JarScannerOptions;
@@ -33,10 +34,7 @@ import io.github.jwdeveloper.dependance.injector.implementation.containers.Conta
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -45,17 +43,23 @@ public class InjectionsScanner {
     DependanceContainerBuilder containerBuilder;
     List<Class<?>> toInitializeTypes;
     JarScannerOptions options;
+    JarScanner jarScanner;
 
-    public InjectionsScanner(ContainerBuilder containerBuilder, JarScannerOptions options) {
+    public InjectionsScanner(ContainerBuilder containerBuilder, JarScannerOptions options, JarScanner jarScanner) {
         this.containerBuilder = (DependanceContainerBuilder) containerBuilder;
         this.toInitializeTypes = new ArrayList<>();
         this.options = options;
+        this.jarScanner = jarScanner;
     }
 
-    public List<Class<?>> scanAndRegister() {
-        var jarScanner = new JarScannerImpl(options, Logger.getLogger(JarScannerImpl.class.getSimpleName()));
-        var methods = findMethods(jarScanner.getClasses());
-        var classes = findClasses(jarScanner.getClasses());
+    public List<Class<?>> scanAndRegister()
+    {
+        if(jarScanner == null)
+        {
+            jarScanner = new JarScannerImpl(options, Logger.getLogger(JarScannerImpl.class.getSimpleName()));
+        }
+        var methods = findMethods(jarScanner.findAll());
+        var classes = findClasses(jarScanner.findAll());
 
         var containerConfig = containerBuilder.getDependanceContainerConfiguration();
         var config = (ContainerConfigurationImpl) containerConfig.getConfiguration();
@@ -135,7 +139,7 @@ public class InjectionsScanner {
         containerBuilder.register((Class) injection.toInterface(), clazz, injection.lifeTime());
     }
 
-    private Set<Method> findMethods(List<Class<?>> classes) {
+    private Set<Method> findMethods(Collection<Class<?>> classes) {
         return classes
                 .stream()
                 .flatMap(c -> Arrays.stream(c.getDeclaredMethods()))
@@ -145,7 +149,7 @@ public class InjectionsScanner {
                 .collect(Collectors.toSet());
     }
 
-    private Set<Class<?>> findClasses(List<Class<?>> classes) {
+    private Set<Class<?>> findClasses(Collection<Class<?>> classes) {
         return classes
                 .stream()
                 .filter(e ->
