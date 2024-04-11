@@ -28,6 +28,7 @@ import io.github.jwdeveloper.dependance.api.JarScanner;
 import io.github.jwdeveloper.dependance.decorator.api.builder.DecoratorBuilder;
 import io.github.jwdeveloper.dependance.decorator.implementation.DecoratorBuilderImpl;
 import io.github.jwdeveloper.dependance.implementation.common.JarScannerOptions;
+import io.github.jwdeveloper.dependance.implementation.common.ScannerEvent;
 import io.github.jwdeveloper.dependance.injector.implementation.containers.builder.ContainerBuilderImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.factory.InjectionInfoFactoryImpl;
 import lombok.Getter;
@@ -82,6 +83,12 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
         return this;
     }
 
+    public DependanceContainerBuilder scan(Class packageClass, ScannerEvent event) {
+        return scan(x ->
+        {
+            x.includePackage(packageClass, event);
+        });
+    }
 
     @Override
     public DependanceContainer build() {

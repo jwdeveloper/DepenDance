@@ -22,5 +22,8 @@
  */
 package common.classess;
 
-public interface ExampleInterface {
+import common.classess.annotations.ExampleInterfaceAnnotation;
+
+@ExampleInterfaceAnnotation
+public interface ExampleInterface extends SuperInterface {
 }

@@ -22,6 +22,8 @@
  */
 package common.classess;
 
+import common.classess.annotations.ExampleAnnotation;
+
 @ExampleAnnotation
 public class ExampleClassV2 extends ExampleSuperClass implements ExampleInterfaceV2, ExampleCommonInterface{
 }

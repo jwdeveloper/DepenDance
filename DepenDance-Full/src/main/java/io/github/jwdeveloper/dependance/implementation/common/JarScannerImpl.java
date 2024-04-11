@@ -35,6 +35,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -42,23 +43,25 @@ import java.util.zip.ZipInputStream;
 public class JarScannerImpl extends ClassLoader implements JarScanner {
 
     @Getter
-    private final List<Class<?>> classes;
-
-    private final Map<Class<?>, List<Class<?>>> byInterfaceCache;
-    private final Map<Class<?>, List<Class<?>>> byParentCache;
-    private final Map<Package, List<Class<?>>> byPackageCache;
-    private final Map<Class<? extends Annotation>, List<Class<?>>> byAnnotationCache;
+    private final Set<Class<?>> classes;
+    private final Map<Class<?>, Set<Class<?>>> byInterfaceCache;
+    private final Map<Class<?>, Set<Class<?>>> byParentCache;
+    private final Map<Package, Set<Class<?>>> byPackageCache;
+    private final Map<Class<? extends Annotation>, Set<Class<?>>> byAnnotationCache;
     private final Logger logger;
     private final JarScannerOptions options;
+    private PackageScanEvent packageScanEvent;
 
     public JarScannerImpl(JarScannerOptions options, Logger logger) {
         this.logger = logger;
         this.options = options;
-        classes = loadClasses();
+        classes = new HashSet<>();
         byInterfaceCache = new IdentityHashMap<>();
         byParentCache = new IdentityHashMap<>();
         byPackageCache = new IdentityHashMap<>();
         byAnnotationCache = new HashMap<>();
+        packageScanEvent = (a, b) -> {
+        };
     }
 
 
@@ -66,9 +69,9 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
         this.classes.addAll(classes);
     }
 
-    protected List<Class<?>> loadClasses() {
-        var result = new ArrayList<Class<?>>(options.getIncludedClasses());
-        var packagesToScan = new ArrayList<>(options.getIncludedPackages());
+    public List<Class<?>> initialize() {
+        var result = new HashSet<Class<?>>(options.getIncludedClasses());
+        var packagesToScan = new HashSet<>(options.getIncludedPackages());
         packagesToScan.add(options.getRootPackage());
         try {
             for (var packagee : packagesToScan) {
@@ -77,18 +80,27 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
                     throw new RuntimeException("Code source not found for class " + packagee.getName());
                 }
                 var url = source.getLocation();
-
+                var scannedClasses = new ArrayList<Class>();
                 if (url.toString().endsWith(".jar"))
-                    result.addAll(loadClassesFromZip(packagee));
+                    scannedClasses.addAll(loadClassesFromZip(packagee));
                 else
-                    result.addAll(loadClassesFromFolder(url, packagee));
+                    scannedClasses.addAll(loadClassesFromFolder(url, packagee));
+
+                packageScanEvent.onScanned(packagee, scannedClasses);
+                for (var clazz : scannedClasses) {
+                    result.add(clazz);
+                }
             }
-        } catch (IOException | URISyntaxException e)
-        {
+        } catch (IOException | URISyntaxException e) {
             logger.log(Level.SEVERE, "Unable to load classes:", e);
             return Collections.emptyList();
         }
-        return result;
+        classes.addAll(result);
+        return result.stream().toList();
+    }
+
+    public void onPackageScan(PackageScanEvent event) {
+        this.packageScanEvent = event;
     }
 
 
@@ -173,7 +185,7 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
         byAnnotationCache.clear();
         byPackageCache.clear();
         byParentCache.clear();
-        loadClasses();
+        initialize();
     }
 
 
@@ -181,7 +193,7 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
         if (byAnnotationCache.containsKey(annotation)) {
             return byAnnotationCache.get(annotation);
         }
-        var result = new ArrayList<Class<?>>();
+        var result = new HashSet<Class<?>>();
         for (var _class : classes) {
             if (_class.isAnnotationPresent(annotation)) {
                 result.add(_class);
@@ -195,7 +207,7 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
         if (byInterfaceCache.containsKey(_interface)) {
             return byInterfaceCache.get(_interface);
         }
-        var result = new ArrayList<Class<?>>();
+        var result = new HashSet<Class<?>>();
         for (var _class : classes) {
             for (var _classInterface : _class.getInterfaces()) {
                 if (_classInterface.equals(_interface)) {
@@ -212,7 +224,7 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
         if (byParentCache.containsKey(superClass)) {
             return byParentCache.get(superClass);
         }
-        var result = new ArrayList<Class<?>>();
+        var result = new HashSet<Class<?>>();
         for (var _class : classes) {
             if (isClassContainsType(_class, superClass)) {
                 result.add(_class);
@@ -226,7 +238,7 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
         if (byPackageCache.containsKey(_package)) {
             return byPackageCache.get(_package);
         }
-        var result = new ArrayList<Class<?>>();
+        var result = new HashSet<Class<?>>();
         for (var _class : classes) {
             for (var _classInterface : _class.getInterfaces()) {
                 if (_classInterface.getPackage().equals(_package)) {
@@ -241,7 +253,7 @@ public class JarScannerImpl extends ClassLoader implements JarScanner {
 
     @Override
     public Collection<Class<?>> findAll() {
-        return Collections.unmodifiableList(classes);
+        return classes.stream().toList();
     }
 
     private static boolean isClassContainsType(Class<?> type, Class<?> searchType) {

@@ -109,17 +109,20 @@ public class DefaultContainer implements Container, Registrable {
 
     @Override
     public <T> Collection<T> findAllByInterface(Class<T> _interface) {
-        if (!injections.containsKey(_interface)) {
-            return List.of();
-        }
 
-        var injectionsInformations = injections.get(_interface);
-        var result = new ArrayList<T>();
-
+        Class _searchedInterface = _interface;
         Object temp = null;
-        for (var injectionInfo : injectionsInformations) {
-            temp = find(injectionInfo);
-            result.add((T) temp);
+        var result = new ArrayList<T>();
+        for(var entry : injections.entrySet())
+        {
+            for(var injection : entry.getValue())
+            {
+                if(injection.hasInterface(_searchedInterface))
+                {
+                    temp = find(injection.getInjectionKeyType());
+                    result.add((T) temp);
+                }
+            }
         }
         return result;
     }

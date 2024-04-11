@@ -57,6 +57,15 @@ public class _6_AutoScan {
                     options.excludeClass("org.example.ExampleClass");
                     options.excludePackage(String.class.getPackageName());
                 })
+                .scan(rootClass, (scannedClasses, containerBuilder) ->
+                {
+                    System.out.println("Hello from scanner those are found classes");
+                    for (var clazz : scannedClasses)
+                    {
+                      System.out.println(clazz.getSimpleName());
+                    }
+                    System.out.println("============================================");
+                })
                 .build();
 
         Config config = container.find(Config.class);

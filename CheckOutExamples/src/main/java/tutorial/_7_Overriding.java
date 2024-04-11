@@ -11,7 +11,6 @@ public class _7_Overriding {
         DependanceContainer container = Dependance.newContainer()
                 .registerTransient(Shop.class, OnlineShop.class)
                 .registerTransient(Shop.class, OfflineShop.class)
-
                 /**
                  * By again declaring Shop but with different implementation (OnlineShop)
                  * We are telling container to Override (OfflineShop) and always returns (OnlineShop)
@@ -19,7 +18,7 @@ public class _7_Overriding {
                 .build();
 
         Shop shop = container.find(Shop.class);
-        Assert.assertEquals(OnlineShop.class, shop.getClass());
-        System.out.println("shop object is instance of OnlineShop Class");
+        Assert.assertEquals(OfflineShop.class, shop.getClass());
+        System.out.println("shop object is instance of OfflineShop Class");
     }
 }

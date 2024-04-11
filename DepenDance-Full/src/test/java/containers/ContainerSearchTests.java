@@ -24,6 +24,8 @@ package containers;
 
 import common.ContainerTestBase;
 import common.classess.*;
+import common.classess.annotations.ExampleAnnotation;
+import common.classess.annotations.ExampleSuperSuperAnnotation;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -41,6 +43,20 @@ public class ContainerSearchTests extends ContainerTestBase {
 
         //Assert
         Assert.assertEquals(2, instances.size());
+    }
+
+    @Test
+    public void shouldFindBySuperInterface()  {
+        //Arrange
+        var container = builder
+                .registerSingleton(ExampleCommonInterface.class, ExampleClass.class)
+                .build();
+
+        //Act
+        var instances = container.findAllByInterface(SuperInterface.class);
+
+        //Assert
+        Assert.assertEquals(1, instances.size());
     }
 
     @Test
@@ -74,9 +90,8 @@ public class ContainerSearchTests extends ContainerTestBase {
         Assert.assertEquals(2, instances.size());
     }
 
-
     @Test
-    public void ShouldFindByAnnotation()  {
+    public void ShouldFindBySuperSuperClass()  {
         //Arrange
         var container = builder
                 .registerSingleton(ExampleClass.class)
@@ -84,9 +99,26 @@ public class ContainerSearchTests extends ContainerTestBase {
                 .build();
 
         //Act
-        var instances = container.findAllByAnnotation(ExampleAnnotation.class);
+        var instances = container.findAllBySuperClass(ExampleSuperSuperClass.class);
 
         //Assert
         Assert.assertEquals(2, instances.size());
+    }
+
+
+    @Test
+    public void ShouldFindByAnnotation()  {
+        //Arrange
+        var container = builder
+                .registerSingleton(ExampleClass.class)
+                .build();
+
+        //Act
+        var instances = container.findAllByAnnotation(ExampleAnnotation.class);
+        var superSuperAnnotations = container.findAllByAnnotation(ExampleSuperSuperAnnotation.class);
+
+        //Assert
+        Assert.assertEquals(1, instances.size());
+        Assert.assertEquals(1, superSuperAnnotations.size());
     }
 }

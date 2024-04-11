@@ -22,5 +22,5 @@
  */
 package common.classess;
 
-public interface ExampleInterfaceV2 {
+public interface ExampleInterfaceV2 extends SuperInterface {
 }

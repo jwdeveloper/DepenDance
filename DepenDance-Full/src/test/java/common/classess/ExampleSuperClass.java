@@ -22,5 +22,6 @@
  */
 package common.classess;
 
-public abstract class ExampleSuperClass {
+
+public abstract class ExampleSuperClass extends ExampleSuperSuperClass {
 }

@@ -52,12 +52,18 @@ public class InjectionsScanner {
         this.jarScanner = jarScanner;
     }
 
-    public List<Class<?>> scanAndRegister()
-    {
-        if(jarScanner == null)
-        {
+    public List<Class<?>> scanAndRegister() {
+        if (jarScanner == null) {
             jarScanner = new JarScannerImpl(options, Logger.getLogger(JarScannerImpl.class.getSimpleName()));
         }
+        jarScanner.onPackageScan((_package, classes) ->
+        {
+            if (!options.getScannerEvents().containsKey(_package)) {
+                return;
+            }
+            options.getScannerEvents().get(_package).onScanned(classes, containerBuilder);
+        });
+        jarScanner.initialize();
         var methods = findMethods(jarScanner.findAll());
         var classes = findClasses(jarScanner.findAll());
 

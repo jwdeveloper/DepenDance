@@ -2,7 +2,9 @@ package io.github.jwdeveloper.dependance.implementation.common;
 
 import lombok.Getter;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -13,6 +15,7 @@ public class JarScannerOptions {
     private final Set<Class<?>> includedClasses;
     private final Set<String> excludedPackages;
     private final Set<String> excludedClasses;
+    private final Map<Class,ScannerEvent> scannerEvents;
 
 
     public JarScannerOptions() {
@@ -20,6 +23,7 @@ public class JarScannerOptions {
         this.excludedClasses = new HashSet<>();
         this.includedClasses = new HashSet<>();
         this.includedPackages = new HashSet<>();
+        this.scannerEvents = new HashMap<>();
     }
 
     public void setRootPackage(Class<?> rootPackage) {
@@ -33,6 +37,11 @@ public class JarScannerOptions {
 
     public void includePackage(Class<?> packagee) {
         includedPackages.add(packagee);
+    }
+
+    public void includePackage(Class<?> packagee, ScannerEvent event) {
+        includePackage(packagee);
+        scannerEvents.put(packagee,event);
     }
 
     public void excludeClass(String packageName) {

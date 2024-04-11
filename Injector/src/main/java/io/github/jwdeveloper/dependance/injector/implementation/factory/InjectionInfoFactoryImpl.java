@@ -34,10 +34,7 @@ import io.github.jwdeveloper.dependance.injector.implementation.utilites.Message
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Function;
 
 public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
@@ -67,7 +64,10 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
 
         var extentedTypes = getExtentedTypes(impl);
         var implementedTypes = getImplementedTypes(impl);
-        var annotations = getAnnotations(impl, extentedTypes);
+
+        var annotationsClasses = new HashSet<>(extentedTypes);
+        annotationsClasses.addAll(implementedTypes);
+        var annotations = getAnnotations(impl, annotationsClasses);
         result.setSuperClasses(extentedTypes);
         result.setInterfaces(implementedTypes);
         result.setAnnotations(annotations);
@@ -96,7 +96,10 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
 
         var extendedTypes = getExtentedTypes(impl);
         var implementedTypes = getImplementedTypes(impl);
-        var annotations = getAnnotations(impl, extendedTypes);
+
+        var annotationsClasses = new HashSet<>(extendedTypes);
+        annotationsClasses.addAll(implementedTypes);
+        var annotations = getAnnotations(impl, annotationsClasses);
         result.setSuperClasses(extendedTypes);
         result.setInterfaces(implementedTypes);
         result.setAnnotations(annotations);
@@ -157,10 +160,9 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         for (var annotation : type.getAnnotations()) {
             annotations.add(annotation.annotationType());
         }
-
         for (var parent : parentTypes) {
             for (var annotation : parent.getAnnotations()) {
-                annotations.add(annotation.getClass());
+                annotations.add(annotation.annotationType());
             }
         }
         return annotations;
@@ -197,8 +199,7 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
             if (param.equals(root)) {
                 throw new DeathCycleException(Messages.INJECTION_DETECTED_CYCLE_DEPENDECY, root.getSimpleName(), current.getSimpleName());
             }
-            if(param.isInterface())
-            {
+            if (param.isInterface()) {
                 continue;
             }
             var ctr = getConstructor(param);

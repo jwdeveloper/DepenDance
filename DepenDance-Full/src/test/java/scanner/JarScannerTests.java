@@ -20,10 +20,10 @@ public class JarScannerTests {
         var scanner = Dependance.newJarScanner(options ->
         {
             options.setRootPackage(JarScannerTests.class);
-        });
+        }).initialize();
 
-        var result = scanner.findAll();
-        Assert.assertEquals(3, result.size());
+
+        Assert.assertEquals(3, scanner.size());
     }
 
     @Test
@@ -32,9 +32,9 @@ public class JarScannerTests {
         {
             options.setRootPackage(JarScannerTests.class);
             options.includePackage(ContainerTestBase.class);
-        });
+        }).initialize();
 
-        var result = scanner.findAll().size() > 3;
+        var result = scanner.size() > 3;
         Assert.assertTrue(result);
     }
 
