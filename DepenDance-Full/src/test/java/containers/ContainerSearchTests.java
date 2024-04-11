@@ -59,6 +59,21 @@ public class ContainerSearchTests extends ContainerTestBase {
         Assert.assertEquals(1, instances.size());
     }
 
+
+    @Test
+    public void shouldFindBySuperInterfaceWithObjectInstance()  {
+        //Arrange
+        var container = builder
+                .registerSingleton(ExampleInterface.class, new ExampleClass())
+                .build();
+
+        //Act
+        var instances = container.findAllByInterface(SuperInterface.class);
+
+        //Assert
+        Assert.assertEquals(1, instances.size());
+    }
+
     @Test
     public void ShouldFindByRegistrationInterfaceInterface()  {
         //Arrange

@@ -119,6 +119,20 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         result.setRegistrationInfo(info);
         result.setInjectionKeyType(_interface);
         result.setInjectionValueType(Function.class);
+
+
+        var extendedTypes = getExtentedTypes(_interface);
+        var implementedTypes = getImplementedTypes(_interface);
+        implementedTypes.add(_interface);
+        extendedTypes.add(_interface);
+
+        var annotationsClasses = new HashSet<>(extendedTypes);
+        annotationsClasses.addAll(implementedTypes);
+        var annotations = getAnnotations(_interface, annotationsClasses);
+        result.setSuperClasses(extendedTypes);
+        result.setInterfaces(implementedTypes);
+        result.setAnnotations(annotations);
+
         return new Pair<>(_interface, result);
     }
 
