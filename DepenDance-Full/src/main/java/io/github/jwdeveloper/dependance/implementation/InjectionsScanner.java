@@ -45,17 +45,14 @@ public class InjectionsScanner {
     JarScannerOptions options;
     JarScanner jarScanner;
 
-    public InjectionsScanner(ContainerBuilder containerBuilder, JarScannerOptions options, JarScanner jarScanner) {
+    public InjectionsScanner(ContainerBuilder containerBuilder, JarScanner jarScanner) {
         this.containerBuilder = (DependanceContainerBuilder) containerBuilder;
         this.toInitializeTypes = new ArrayList<>();
-        this.options = options;
         this.jarScanner = jarScanner;
     }
 
-    public List<Class<?>> scanAndRegister() {
-        if (jarScanner == null) {
-            jarScanner = new JarScannerImpl(options, Logger.getLogger(JarScannerImpl.class.getSimpleName()));
-        }
+    public List<Class<?>> scanAndRegister()
+    {
         jarScanner.onPackageScan((_package, classes) ->
         {
             if (!options.getScannerEvents().containsKey(_package)) {

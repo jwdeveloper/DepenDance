@@ -22,25 +22,30 @@
  */
 package io.github.jwdeveloper.dependance.implementation;
 
+import io.github.jwdeveloper.dependance.Dependance;
 import io.github.jwdeveloper.dependance.api.DependanceContainer;
 import io.github.jwdeveloper.dependance.api.DependanceContainerConfiguration;
 import io.github.jwdeveloper.dependance.api.JarScanner;
 import io.github.jwdeveloper.dependance.decorator.api.builder.DecoratorBuilder;
 import io.github.jwdeveloper.dependance.decorator.implementation.DecoratorBuilderImpl;
+import io.github.jwdeveloper.dependance.implementation.common.JarScannerImpl;
 import io.github.jwdeveloper.dependance.implementation.common.JarScannerOptions;
 import io.github.jwdeveloper.dependance.implementation.common.ScannerEvent;
 import io.github.jwdeveloper.dependance.injector.implementation.containers.builder.ContainerBuilderImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.factory.InjectionInfoFactoryImpl;
 import lombok.Getter;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 
 public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceContainerConfiguration, DependanceContainerBuilder> {
 
     private final DecoratorBuilder decoratorBuilder;
     private final JarScannerOptions options;
-    private JarScanner jarScanner;
+    private List<JarScanner> additionalScanners =new ArrayList<>();
     private boolean scanEnabled;
 
     @Getter
@@ -77,9 +82,10 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
         return this;
     }
 
-    public DependanceContainerBuilder scan(JarScanner jarScanner) {
+    public DependanceContainerBuilder scan(JarScanner jarScanner)
+    {
         scanEnabled = true;
-        this.jarScanner = jarScanner;
+        this.additionalScanners.add(jarScanner);
         return this;
     }
 
@@ -98,8 +104,12 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
         if (!scanEnabled) {
             return new DepenDanceContainerImpl(super.build());
         }
-
-        var scanner = new InjectionsScanner(this, options, jarScanner);
+        var jarScanner = new JarScannerImpl(options, Logger.getLogger(Dependance.class.getSimpleName()));
+        for(var additionalScanner : additionalScanners)
+        {
+            jarScanner.addClasses(additionalScanner.findAll());
+        }
+        var scanner = new InjectionsScanner(this,  jarScanner);
         var toInitialize = scanner.scanAndRegister();
         var container = super.build();
         for (var clazz : toInitialize) {
