@@ -45,7 +45,7 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
 
     private final DecoratorBuilder decoratorBuilder;
     private final JarScannerOptions options;
-    private List<JarScanner> additionalScanners =new ArrayList<>();
+    private List<JarScanner> additionalScanners = new ArrayList<>();
     private boolean scanEnabled;
 
     @Getter
@@ -82,8 +82,7 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
         return this;
     }
 
-    public DependanceContainerBuilder scan(JarScanner jarScanner)
-    {
+    public DependanceContainerBuilder scan(JarScanner jarScanner) {
         scanEnabled = true;
         this.additionalScanners.add(jarScanner);
         return this;
@@ -105,11 +104,10 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
             return new DepenDanceContainerImpl(super.build());
         }
         var jarScanner = new JarScannerImpl(options, Logger.getLogger(Dependance.class.getSimpleName()));
-        for(var additionalScanner : additionalScanners)
-        {
+        for (var additionalScanner : additionalScanners) {
             jarScanner.addClasses(additionalScanner.findAll());
         }
-        var scanner = new InjectionsScanner(this,  jarScanner);
+        var scanner = new InjectionsScanner(this, options, jarScanner);
         var toInitialize = scanner.scanAndRegister();
         var container = super.build();
         for (var clazz : toInitialize) {

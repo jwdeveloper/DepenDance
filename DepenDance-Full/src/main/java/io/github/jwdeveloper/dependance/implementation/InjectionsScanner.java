@@ -24,7 +24,6 @@ package io.github.jwdeveloper.dependance.implementation;
 
 import io.github.jwdeveloper.dependance.api.JarScanner;
 import io.github.jwdeveloper.dependance.api.events.AutoScanEvent;
-import io.github.jwdeveloper.dependance.implementation.common.JarScannerImpl;
 import io.github.jwdeveloper.dependance.implementation.common.JarScannerOptions;
 import io.github.jwdeveloper.dependance.injector.api.annotations.IgnoreInjection;
 import io.github.jwdeveloper.dependance.injector.api.annotations.Injection;
@@ -36,29 +35,28 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Function;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class InjectionsScanner {
     DependanceContainerBuilder containerBuilder;
     List<Class<?>> toInitializeTypes;
-    JarScannerOptions options;
+    JarScannerOptions jarScannerOptions;
     JarScanner jarScanner;
 
-    public InjectionsScanner(ContainerBuilder containerBuilder, JarScanner jarScanner) {
+    public InjectionsScanner(ContainerBuilder containerBuilder, JarScannerOptions options, JarScanner jarScanner) {
         this.containerBuilder = (DependanceContainerBuilder) containerBuilder;
         this.toInitializeTypes = new ArrayList<>();
         this.jarScanner = jarScanner;
+        this.jarScannerOptions = options;
     }
 
-    public List<Class<?>> scanAndRegister()
-    {
+    public List<Class<?>> scanAndRegister() {
         jarScanner.onPackageScan((_package, classes) ->
         {
-            if (!options.getScannerEvents().containsKey(_package)) {
+            if (!jarScannerOptions.getScannerEvents().containsKey(_package)) {
                 return;
             }
-            options.getScannerEvents().get(_package).onScanned(classes, containerBuilder);
+            jarScannerOptions.getScannerEvents().get(_package).onScanned(classes, containerBuilder);
         });
         jarScanner.initialize();
         var methods = findMethods(jarScanner.findAll());
