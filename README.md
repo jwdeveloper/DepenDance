@@ -63,7 +63,7 @@
     <dependency>
         <groupid>com.github.jwdeveloper.DepenDance</groupid>
         <artifactid>DepenDance-Full</artifactid>
-        <version>0.0.6-Release</version>
+        <version>0.0.7-Release</version>
     </dependency>     
 ```
 
@@ -142,7 +142,6 @@ public class _7_Overriding {
         DependanceContainer container = Dependance.newContainer()
                 .registerTransient(Shop.class, OnlineShop.class)
                 .registerTransient(Shop.class, OfflineShop.class)
-
                 /**
                  * By again declaring Shop but with different implementation (OnlineShop)
                  * We are telling container to Override (OfflineShop) and always returns (OnlineShop)
@@ -150,8 +149,8 @@ public class _7_Overriding {
                 .build();
 
         Shop shop = container.find(Shop.class);
-        Assert.assertEquals(OnlineShop.class, shop.getClass());
-        System.out.println("shop object is instance of OnlineShop Class");
+        Assert.assertEquals(OfflineShop.class, shop.getClass());
+        System.out.println("shop object is instance of OfflineShop Class");
     }
 } 
 ```
@@ -327,6 +326,15 @@ public class _6_AutoScan {
                     options.setRootPackage(rootClass);
                     options.excludeClass("org.example.ExampleClass");
                     options.excludePackage(String.class.getPackageName());
+                })
+                .scan(rootClass, (scannedClasses, containerBuilder) ->
+                {
+                    System.out.println("Hello from scanner those are found classes");
+                    for (var clazz : scannedClasses)
+                    {
+                      System.out.println(clazz.getSimpleName());
+                    }
+                    System.out.println("============================================");
                 })
                 .build();
 
