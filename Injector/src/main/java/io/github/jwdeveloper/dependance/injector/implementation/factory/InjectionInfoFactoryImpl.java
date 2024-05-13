@@ -33,6 +33,7 @@ import io.github.jwdeveloper.dependance.injector.implementation.utilites.Message
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.function.Function;
@@ -57,27 +58,7 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         if (Modifier.isInterface(impl.getModifiers())) {
             throw new ContainerException("Implementation must be class, not Interface");
         }
-
-        var result = new InjectionInfo();
-        var constructor = getConstructor(impl);
-        throwIfCycleDependency(constructor, impl, impl);
-
-        var extentedTypes = getExtentedTypes(impl);
-        var implementedTypes = getImplementedTypes(impl);
-
-        var annotationsClasses = new HashSet<>(extentedTypes);
-        annotationsClasses.addAll(implementedTypes);
-        var annotations = getAnnotations(impl, annotationsClasses);
-        result.setSuperClasses(extentedTypes);
-        result.setInterfaces(implementedTypes);
-        result.setAnnotations(annotations);
-
-        result.setInjectedConstructor(constructor);
-        result.setConstructorTypes(constructor.getParameterTypes());
-        result.setRegistrationInfo(info);
-        result.setInjectionKeyType(impl);
-        result.setInjectionValueType(impl);
-        return new Pair<>(impl, result);
+        return PrepareInjectionInfo(impl, impl, info);
     }
 
     private Pair<Class<?>, InjectionInfo> InterfaceAndImlStrategy(RegistrationInfo info) throws Exception {
@@ -89,7 +70,11 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         if (Modifier.isInterface(impl.getModifiers())) {
             throw new ContainerException("Implementation must be class, not Interface");
         }
+        return PrepareInjectionInfo(impl, _interface, info);
+    }
 
+
+    private Pair<Class<?>, InjectionInfo> PrepareInjectionInfo(Class<?> impl, Class<?> _interface, RegistrationInfo info) {
         var result = new InjectionInfo();
         var constructor = getConstructor(impl);
         throwIfCycleDependency(constructor, impl, impl);
@@ -105,13 +90,16 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         result.setAnnotations(annotations);
 
         result.setInjectedConstructor(constructor);
-        result.setConstructorTypes(constructor.getParameterTypes());
+        result.setInjectedConstructorTypes(constructor.getParameterTypes());
         result.setRegistrationInfo(info);
         result.setInjectionKeyType(_interface);
         result.setInjectionValueType(impl);
+
+        var fields = getInjectedFields(impl);
+        result.setInjectedFields(fields);
+
         return new Pair<>(_interface, result);
     }
-
 
     private Pair<Class<?>, InjectionInfo> InterfaceAndProviderStrategy(RegistrationInfo info) {
         var _interface = info._interface();
@@ -182,7 +170,6 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         return annotations;
     }
 
-
     private Set<Class<?>> getExtentedTypes(Class<?> type) {
         var superClassTypes = new HashSet<Class<?>>();
         var subClass = type.getSuperclass();
@@ -206,6 +193,17 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
             return consturctor;
         }
         throw new ContainerException(Messages.INJECTION_USE_ANNOTATION_WITH_MORE_CONSTUROCTORS);
+    }
+
+    private Field[] getInjectedFields(Class<?> _class) {
+        var fields = Arrays.stream(_class.getDeclaredFields())
+                .filter(e -> e.isAnnotationPresent(Inject.class))
+                .toList()
+                .toArray(new Field[0]);
+        for (var field : fields) {
+            field.setAccessible(true);
+        }
+        return fields;
     }
 
     private void throwIfCycleDependency(Constructor constructor, Class<?> current, Class<?> root) {

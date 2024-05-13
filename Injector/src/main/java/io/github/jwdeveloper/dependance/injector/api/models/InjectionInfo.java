@@ -27,6 +27,7 @@ import lombok.Data;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -35,15 +36,17 @@ public class InjectionInfo {
     private Class<?> injectionKeyType;
     private Class<?> injectionValueType;
     private RegistrationInfo registrationInfo;
-    private Class<?>[] constructorTypes;
+    private Class<?>[] injectedConstructorTypes;
     private Constructor<?> injectedConstructor;
+    private Field[] injectedFields;
+
     private Set<Class<?>> superClasses = new HashSet<>();
     private Set<Class<?>> interfaces = new HashSet<>();
     private Set<Class<? extends Annotation>> annotations = new HashSet<>();
 
     private Object[] constructorPayLoadTemp;
 
-    private Object instnace;
+    private Object instance;
 
     public LifeTime getLifeTime() {
         return registrationInfo.lifeTime();
@@ -68,8 +71,8 @@ public class InjectionInfo {
         return interfaces.contains(parent);
     }
 
-    public void setConstructorTypes(Class<?>[] constructorTypes) {
-        this.constructorTypes = constructorTypes;
-        this.constructorPayLoadTemp = new Object[constructorTypes.length];
+    public void setInjectedConstructorTypes(Class<?>[] injectedConstructorTypes) {
+        this.injectedConstructorTypes = injectedConstructorTypes;
+        this.constructorPayLoadTemp = new Object[injectedConstructorTypes.length];
     }
 }

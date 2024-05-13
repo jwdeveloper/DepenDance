@@ -42,14 +42,14 @@ public class DecoratorInstanceProviderImpl implements DecoratorInstanceProvider 
     }
 
     public Object tryGetInstance(InjectionInfo info, Map<Class<?>, List<InjectionInfo>> injections, Object toSwap, Container container) throws Exception {
-        if (info.getLifeTime() == LifeTime.SINGLETON && info.getInstnace() != null)
-            return info.getInstnace();
+        if (info.getLifeTime() == LifeTime.SINGLETON && info.getInstance() != null)
+            return info.getInstance();
 
         Object result = null;
         InjectionInfo handler = null;
         if (info.hasInjectedConstructor()) {
             var i = 0;
-            for (var parameter : info.getConstructorTypes()) {
+            for (var parameter : info.getInjectedConstructorTypes()) {
                 if (!injections.containsKey(parameter)) {
                     throw new RuntimeException(String.format(Messages.INJECTION_NOT_FOUND, parameter.getTypeName(), info.getInjectionKeyType()));
                 }
@@ -65,7 +65,7 @@ public class DecoratorInstanceProviderImpl implements DecoratorInstanceProvider 
                 i++;
             }
             result = info.getInjectedConstructor().newInstance(info.getConstructorPayLoadTemp());
-            info.setInstnace(result);
+            info.setInstance(result);
             return result;
         }
 
@@ -73,7 +73,7 @@ public class DecoratorInstanceProviderImpl implements DecoratorInstanceProvider 
             case InterfaceAndIml, OnlyImpl -> info.getRegistrationInfo().implementation().newInstance();
             case InterfaceAndProvider, List -> info.getRegistrationInfo().provider().apply(container);
         };
-        info.setInstnace(result);
+        info.setInstance(result);
         return result;
     }
 }

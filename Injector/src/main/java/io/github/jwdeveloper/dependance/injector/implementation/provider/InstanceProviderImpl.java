@@ -32,20 +32,19 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 public class InstanceProviderImpl implements InstanceProvider {
     @Override
     public Object getInstance(InjectionInfo info, Container container) throws Exception {
-        if (info.getLifeTime() == LifeTime.SINGLETON && info.getInstnace() != null)
-            return info.getInstnace();
+        if (info.getLifeTime() == LifeTime.SINGLETON && info.getInstance() != null)
+            return info.getInstance();
 
         Object result = null;
         InjectionInfo handler = null;
         Class<?> parameterClass = null;
         if (info.hasInjectedConstructor()) {
             var i = 0;
-            for (var parameterType : info.getConstructorTypes()) {
+            for (var parameterType : info.getInjectedConstructorTypes()) {
                 parameterClass = parameterType;
 
                 Type genericType = info.getInjectedConstructor().getGenericParameterTypes()[i];
@@ -57,7 +56,12 @@ public class InstanceProviderImpl implements InstanceProvider {
                 i++;
             }
             result = info.getInjectedConstructor().newInstance(info.getConstructorPayLoadTemp());
-            info.setInstnace(result);
+            for (var injectedField : info.getInjectedFields())
+            {
+                var fieldValue = container.find(injectedField.getType(), injectedField.getGenericType());
+                injectedField.set(result, fieldValue);
+            }
+            info.setInstance(result);
             return result;
         }
 
@@ -66,7 +70,7 @@ public class InstanceProviderImpl implements InstanceProvider {
             case InterfaceAndProvider -> info.getRegistrationInfo().provider().apply(container);
             case List -> handleList(info, container);
         };
-        info.setInstnace(result);
+        info.setInstance(result);
         return result;
     }
 
