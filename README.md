@@ -63,7 +63,7 @@
     <dependency>
         <groupid>com.github.jwdeveloper.DepenDance</groupid>
         <artifactid>DepenDance-Full</artifactid>
-        <version>0.0.11-Release</version>
+        <version>0.0.12-Release</version>
     </dependency>     
 ```
 
@@ -94,82 +94,54 @@ Lightweight dependency injection container that is both small and performance ef
 <h1>Examples</h1>
 
 
-### Fields
+### Generic Types
 
 ```java
-public class _9_Fields {
-    /**
-     * In case you don't want to use constructor, you can just tag fields with attribute @inject
-     */
+public class _5_Generic_Types {
 
     public static void main(String[] args) {
 
-        DependanceContainer container = Dependance.newContainer()
-                .registerTransient(_9_Fields.ExampleClass1.class)
-                .registerTransient(_9_Fields.ExampleClass2.class)
-                .registerTransient(_9_Fields.FieldsExample.class)
-                .build();
+        var container = Dependance.newContainer()
+                .configure(configuration ->
+                {
+                    /*
+                     * Since java is not storing information about generic type after compilation
+                     * we can not assign class with generic type to variable, so Repository<MyGenericType>.class is not possible
+                     * Therefor all cases with generic types (besides lists) must be handled manually in onInjection event
+                     */
 
-        _9_Fields.FieldsExample example = container.find(_9_Fields.FieldsExample.class);
-        Assert.assertNotNull(example);
-        Assert.assertNotNull(example.getExampleClass1());
-        Assert.assertNotNull(example.getExampleClass2());
-    }
+                    configuration.onInjection(injection ->
+                    {
+                        if(!injection.input().isAssignableFrom(Repository.class))
+                        {
+                            return injection.output();
+                        }
 
-    @Getter
-    public static class FieldsExample {
+                        var genericParameter =injection.inputGenericParameters()[0];
+                        if(genericParameter.equals(OnlineShop.class))
+                        {
+                            return new Repository<OnlineShop>();
+                        }
+                        if(genericParameter.equals(LocalShop.class))
+                        {
+                            return new Repository<LocalShop>();
+                        }
+                        return new Repository();
+                    });
+                })
 
-        @Inject
-        private ExampleClass1 exampleClass1;
-
-        @Inject
-        private ExampleClass2 exampleClass2;
-    }
-
-    public static class ExampleClass1 {
-
-    }
-
-    public static class ExampleClass2 {
-
-    }
-} 
-```
-### Basic
-
-```java
-public class _1_Basic {
-
-
-    public static void main(String[] args) {
-        /*
-           - Singleton There will be only one instance of object created by container
-           - Transient everytime `container.find` is used new instance of object is created
-         */
-
-        DependanceContainer container = Dependance.newContainer()
-                .registerTransient(Shop.class, LocalShop.class) //registration interface to implementation
-                .registerSingleton(Config.class)
-                .registerSingleton(ShopManager.class)
                 .build();
 
 
-        ShopManager shopManager1 = container.find(ShopManager.class);
-        ShopManager shopManager2 = container.find(ShopManager.class);
+        //first parameter is class, second one is its generic parameter
+        var onlineShopRepo = container.find(Repository.class, OnlineShop.class);
+        var localShopRepo = container.find(Repository.class, LocalShop.class);
 
-        Shop shop1 = container.find(Shop.class);
-        Shop shop2 = container.find(Shop.class);
-
-
-        Assert.assertEquals(shopManager1, shopManager2);
-        System.out.println("There always same instance of shop manager");
-
-        Assert.assertEquals(shopManager1.getConfig(), shopManager2.getConfig());
-        System.out.println("There always same instance of config");
-
-        Assert.assertNotEquals(shop1, shop2);
-        System.out.println("There are different instances of shop");
+        Assert.assertNotNull(onlineShopRepo);
+        Assert.assertNotNull(localShopRepo);
     }
+
+
 } 
 ```
 ### Events
@@ -269,6 +241,115 @@ public class _2_Object_Instances
     }
 } 
 ```
+### Overriding
+
+```java
+public class _7_Overriding {
+    public static void main(String[] args) {
+
+        DependanceContainer container = Dependance.newContainer()
+                .registerTransient(Shop.class, OnlineShop.class)
+                .registerTransient(Shop.class, OfflineShop.class)
+                /**
+                 * By again declaring Shop but with different implementation (OnlineShop)
+                 * We are telling container to Override (OfflineShop) and always returns (OnlineShop)
+                 */
+                .build();
+
+        Shop shop = container.find(Shop.class);
+        Assert.assertEquals(OfflineShop.class, shop.getClass());
+        System.out.println("shop object is instance of OfflineShop Class");
+    }
+} 
+```
+### Fields
+
+```java
+public class _9_Fields {
+    /**
+     * In case you don't want to use constructor, you can just tag fields with attribute @inject
+     */
+
+    public static void main(String[] args) {
+
+        DependanceContainer container = Dependance.newContainer()
+                .registerTransient(_9_Fields.ExampleClass1.class)
+                .registerTransient(_9_Fields.ExampleClass2.class)
+                .registerTransient(_9_Fields.FieldsExample.class)
+                .build();
+
+        _9_Fields.FieldsExample example = container.find(_9_Fields.FieldsExample.class);
+        Assert.assertNotNull(example);
+        Assert.assertNotNull(example.getExampleClass1());
+        Assert.assertNotNull(example.getExampleClass2());
+    }
+
+    @Getter
+    public static class FieldsExample {
+
+        @Inject
+        private ExampleClass1 exampleClass1;
+
+        @Inject
+        private ExampleClass2 exampleClass2;
+    }
+
+    public static class ExampleClass1 {
+
+    }
+
+    public static class ExampleClass2 {
+
+    }
+} 
+```
+### ManyConstructors
+
+```java
+public class _8_ManyConstructors
+{
+    /**
+     *  By the default the first constructor is always targeted for injecting parameters
+     *  However, sometimes class can have more than one constructor, or we want to use
+     *  specific one.
+     *
+     *  To do that use @Inject annotation over wanted constructor
+     *
+     */
+
+    public static void main(String[] args) {
+
+        DependanceContainer container = Dependance.newContainer()
+                .registerTransient(ExampleClass.class)
+                .registerTransient(ManyConstructorsExample.class)
+                .build();
+
+        ManyConstructorsExample example = container.find(ManyConstructorsExample.class);
+        Assert.assertNotNull(example);
+        System.out.println("It works!");
+    }
+
+    public static class ManyConstructorsExample
+    {
+
+        public ManyConstructorsExample(String a, int b, boolean c)
+        {
+
+        }
+
+        @Inject
+        public ManyConstructorsExample(ExampleClass c)
+        {
+            System.out.println("Hello from constructor with ExampleClass parameter");
+        }
+    }
+
+    public static class ExampleClass
+    {
+
+    }
+} 
+```
 ### AutoScan
 
 ```java
@@ -349,121 +430,40 @@ public class _6_AutoScan {
     }
 } 
 ```
-### Generic Types
+### Basic
 
 ```java
-public class _5_Generic_Types {
+public class _1_Basic {
+
 
     public static void main(String[] args) {
-
-        var container = Dependance.newContainer()
-                .configure(configuration ->
-                {
-                    /*
-                     * Since java is not storing information about generic type after compilation
-                     * we can not assign class with generic type to variable, so Repository<MyGenericType>.class is not possible
-                     * Therefor all cases with generic types (besides lists) must be handled manually in onInjection event
-                     */
-
-                    configuration.onInjection(injection ->
-                    {
-                        if(!injection.input().isAssignableFrom(Repository.class))
-                        {
-                            return injection.output();
-                        }
-
-                        var genericParameter =injection.inputGenericParameters()[0];
-                        if(genericParameter.equals(OnlineShop.class))
-                        {
-                            return new Repository<OnlineShop>();
-                        }
-                        if(genericParameter.equals(LocalShop.class))
-                        {
-                            return new Repository<LocalShop>();
-                        }
-                        return new Repository();
-                    });
-                })
-
-                .build();
-
-
-        //first parameter is class, second one is its generic parameter
-        var onlineShopRepo = container.find(Repository.class, OnlineShop.class);
-        var localShopRepo = container.find(Repository.class, LocalShop.class);
-
-        Assert.assertNotNull(onlineShopRepo);
-        Assert.assertNotNull(localShopRepo);
-    }
-
-
-} 
-```
-### ManyConstructors
-
-```java
-public class _8_ManyConstructors
-{
-    /**
-     *  By the default the first constructor is always targeted for injecting parameters
-     *  However, sometimes class can have more than one constructor, or we want to use
-     *  specific one.
-     *
-     *  To do that use @Inject annotation over wanted constructor
-     *
-     */
-
-    public static void main(String[] args) {
+        /*
+           - Singleton There will be only one instance of object created by container
+           - Transient everytime `container.find` is used new instance of object is created
+         */
 
         DependanceContainer container = Dependance.newContainer()
-                .registerTransient(ExampleClass.class)
-                .registerTransient(ManyConstructorsExample.class)
+                .registerTransient(Shop.class, LocalShop.class) //registration interface to implementation
+                .registerSingleton(Config.class)
+                .registerSingleton(ShopManager.class)
                 .build();
 
-        ManyConstructorsExample example = container.find(ManyConstructorsExample.class);
-        Assert.assertNotNull(example);
-        System.out.println("It works!");
-    }
 
-    public static class ManyConstructorsExample
-    {
+        ShopManager shopManager1 = container.find(ShopManager.class);
+        ShopManager shopManager2 = container.find(ShopManager.class);
 
-        public ManyConstructorsExample(String a, int b, boolean c)
-        {
+        Shop shop1 = container.find(Shop.class);
+        Shop shop2 = container.find(Shop.class);
 
-        }
 
-        @Inject
-        public ManyConstructorsExample(ExampleClass c)
-        {
-            System.out.println("Hello from constructor with ExampleClass parameter");
-        }
-    }
+        Assert.assertEquals(shopManager1, shopManager2);
+        System.out.println("There always same instance of shop manager");
 
-    public static class ExampleClass
-    {
+        Assert.assertEquals(shopManager1.getConfig(), shopManager2.getConfig());
+        System.out.println("There always same instance of config");
 
-    }
-} 
-```
-### Overriding
-
-```java
-public class _7_Overriding {
-    public static void main(String[] args) {
-
-        DependanceContainer container = Dependance.newContainer()
-                .registerTransient(Shop.class, OnlineShop.class)
-                .registerTransient(Shop.class, OfflineShop.class)
-                /**
-                 * By again declaring Shop but with different implementation (OnlineShop)
-                 * We are telling container to Override (OfflineShop) and always returns (OnlineShop)
-                 */
-                .build();
-
-        Shop shop = container.find(Shop.class);
-        Assert.assertEquals(OfflineShop.class, shop.getClass());
-        System.out.println("shop object is instance of OfflineShop Class");
+        Assert.assertNotEquals(shop1, shop2);
+        System.out.println("There are different instances of shop");
     }
 } 
 ```
