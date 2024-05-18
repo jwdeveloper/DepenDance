@@ -63,7 +63,7 @@
     <dependency>
         <groupid>com.github.jwdeveloper.DepenDance</groupid>
         <artifactid>DepenDance-Full</artifactid>
-        <version>0.0.10-Release</version>
+        <version>0.0.11-Release</version>
     </dependency>     
 ```
 
@@ -94,114 +94,45 @@ Lightweight dependency injection container that is both small and performance ef
 <h1>Examples</h1>
 
 
-### Events
+### Fields
 
 ```java
-public class _4_Events {
-    public static void main(String[] args) {
-        DependanceContainer container = Dependance.newContainer()
-                .registerSingleton(Shop.class, LocalShop.class)
-                .registerSingleton(Shop.class, OnlineShop.class)
-                .configure(config ->
-                {
-                    config.onInjection(_4_Events::onInjection);
-                    config.onRegistration(_4_Events::onRegistration);
-                })
-                .build();
+public class _9_Fields {
+    /**
+     * In case you don't want to use constructor, you can just tag fields with attribute @inject
+     */
 
-        Object shops = container.find(Shop.class, String.class);
-    }
-
-
-    private static Boolean onRegistration(OnRegistrationEvent event) {
-        System.out.println("onRegistration event: " + event.registrationInfo().implementation().getSimpleName());
-        return true; //If false `container.find` injection is not registered to container
-    }
-
-    private static Object onInjection(OnInjectionEvent event) {
-        var inputType = event.input();// searched class type provided as first parameters
-        var genericTypes = event.inputGenericParameters(); //list of generic types provided as second parameter
-        var outputObject = event.output(); //Target object instance type has not been found then output value is null
-        var container = event.container(); //access to DI container
-        var injectonMetadata = event.injectionInfo();
-
-        System.out.println("OnInjection input class: " + inputType.getSimpleName());
-        System.out.println("OnInjection output class: " + outputObject.getClass().getSimpleName());
-        System.out.println("OnInjection genericTypes: " + genericTypes.length);
-        System.out.println("OnInjection metadata: " + injectonMetadata.toString());
-        return outputObject;
-    }
-} 
-```
-### Overriding
-
-```java
-public class _7_Overriding {
     public static void main(String[] args) {
 
         DependanceContainer container = Dependance.newContainer()
-                .registerTransient(Shop.class, OnlineShop.class)
-                .registerTransient(Shop.class, OfflineShop.class)
-                /**
-                 * By again declaring Shop but with different implementation (OnlineShop)
-                 * We are telling container to Override (OfflineShop) and always returns (OnlineShop)
-                 */
+                .registerTransient(_9_Fields.ExampleClass1.class)
+                .registerTransient(_9_Fields.ExampleClass2.class)
+                .registerTransient(_9_Fields.FieldsExample.class)
                 .build();
 
-        Shop shop = container.find(Shop.class);
-        Assert.assertEquals(OfflineShop.class, shop.getClass());
-        System.out.println("shop object is instance of OfflineShop Class");
-    }
-} 
-```
-### Generic Types
-
-```java
-public class _5_Generic_Types {
-
-    public static void main(String[] args) {
-
-        var container = Dependance.newContainer()
-                .configure(configuration ->
-                {
-                    /*
-                     * Since java is not storing information about generic type after compilation
-                     * we can not assign class with generic type to variable, so Repository<MyGenericType>.class is not possible
-                     * Therefor all cases with generic types (besides lists) must be handled manually in onInjection event
-                     */
-
-                    configuration.onInjection(injection ->
-                    {
-                        if(!injection.input().isAssignableFrom(Repository.class))
-                        {
-                            return injection.output();
-                        }
-
-                        var genericParameter =injection.inputGenericParameters()[0];
-                        if(genericParameter.equals(OnlineShop.class))
-                        {
-                            return new Repository<OnlineShop>();
-                        }
-                        if(genericParameter.equals(LocalShop.class))
-                        {
-                            return new Repository<LocalShop>();
-                        }
-                        return new Repository();
-                    });
-                })
-
-                .build();
-
-
-        //first parameter is class, second one is its generic parameter
-        var onlineShopRepo = container.find(Repository.class, OnlineShop.class);
-        var localShopRepo = container.find(Repository.class, LocalShop.class);
-
-        Assert.assertNotNull(onlineShopRepo);
-        Assert.assertNotNull(localShopRepo);
+        _9_Fields.FieldsExample example = container.find(_9_Fields.FieldsExample.class);
+        Assert.assertNotNull(example);
+        Assert.assertNotNull(example.getExampleClass1());
+        Assert.assertNotNull(example.getExampleClass2());
     }
 
+    @Getter
+    public static class FieldsExample {
 
+        @Inject
+        private ExampleClass1 exampleClass1;
+
+        @Inject
+        private ExampleClass2 exampleClass2;
+    }
+
+    public static class ExampleClass1 {
+
+    }
+
+    public static class ExampleClass2 {
+
+    }
 } 
 ```
 ### Basic
@@ -238,6 +169,45 @@ public class _1_Basic {
 
         Assert.assertNotEquals(shop1, shop2);
         System.out.println("There are different instances of shop");
+    }
+} 
+```
+### Events
+
+```java
+public class _4_Events {
+    public static void main(String[] args) {
+        DependanceContainer container = Dependance.newContainer()
+                .registerSingleton(Shop.class, LocalShop.class)
+                .registerSingleton(Shop.class, OnlineShop.class)
+                .configure(config ->
+                {
+                    config.onInjection(_4_Events::onInjection);
+                    config.onRegistration(_4_Events::onRegistration);
+                })
+                .build();
+
+        Object shops = container.find(Shop.class, String.class);
+    }
+
+
+    private static Boolean onRegistration(OnRegistrationEvent event) {
+        System.out.println("onRegistration event: " + event.registrationInfo().implementation().getSimpleName());
+        return true; //If false `container.find` injection is not registered to container
+    }
+
+    private static Object onInjection(OnInjectionEvent event) {
+        var inputType = event.input();// searched class type provided as first parameters
+        var genericTypes = event.inputGenericParameters(); //list of generic types provided as second parameter
+        var outputObject = event.output(); //Target object instance type has not been found then output value is null
+        var container = event.container(); //access to DI container
+        var injectonMetadata = event.injectionInfo();
+
+        System.out.println("OnInjection input class: " + inputType.getSimpleName());
+        System.out.println("OnInjection output class: " + outputObject.getClass().getSimpleName());
+        System.out.println("OnInjection genericTypes: " + genericTypes.length);
+        System.out.println("OnInjection metadata: " + injectonMetadata.toString());
+        return outputObject;
     }
 } 
 ```
@@ -379,6 +349,56 @@ public class _6_AutoScan {
     }
 } 
 ```
+### Generic Types
+
+```java
+public class _5_Generic_Types {
+
+    public static void main(String[] args) {
+
+        var container = Dependance.newContainer()
+                .configure(configuration ->
+                {
+                    /*
+                     * Since java is not storing information about generic type after compilation
+                     * we can not assign class with generic type to variable, so Repository<MyGenericType>.class is not possible
+                     * Therefor all cases with generic types (besides lists) must be handled manually in onInjection event
+                     */
+
+                    configuration.onInjection(injection ->
+                    {
+                        if(!injection.input().isAssignableFrom(Repository.class))
+                        {
+                            return injection.output();
+                        }
+
+                        var genericParameter =injection.inputGenericParameters()[0];
+                        if(genericParameter.equals(OnlineShop.class))
+                        {
+                            return new Repository<OnlineShop>();
+                        }
+                        if(genericParameter.equals(LocalShop.class))
+                        {
+                            return new Repository<LocalShop>();
+                        }
+                        return new Repository();
+                    });
+                })
+
+                .build();
+
+
+        //first parameter is class, second one is its generic parameter
+        var onlineShopRepo = container.find(Repository.class, OnlineShop.class);
+        var localShopRepo = container.find(Repository.class, LocalShop.class);
+
+        Assert.assertNotNull(onlineShopRepo);
+        Assert.assertNotNull(localShopRepo);
+    }
+
+
+} 
+```
 ### ManyConstructors
 
 ```java
@@ -423,6 +443,27 @@ public class _8_ManyConstructors
     public static class ExampleClass
     {
 
+    }
+} 
+```
+### Overriding
+
+```java
+public class _7_Overriding {
+    public static void main(String[] args) {
+
+        DependanceContainer container = Dependance.newContainer()
+                .registerTransient(Shop.class, OnlineShop.class)
+                .registerTransient(Shop.class, OfflineShop.class)
+                /**
+                 * By again declaring Shop but with different implementation (OnlineShop)
+                 * We are telling container to Override (OfflineShop) and always returns (OnlineShop)
+                 */
+                .build();
+
+        Shop shop = container.find(Shop.class);
+        Assert.assertEquals(OfflineShop.class, shop.getClass());
+        System.out.println("shop object is instance of OfflineShop Class");
     }
 } 
 ```
