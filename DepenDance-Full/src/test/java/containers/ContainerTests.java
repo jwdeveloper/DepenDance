@@ -147,4 +147,14 @@ public class ContainerTests extends ContainerTestBase {
         Assert.assertEquals(3, exampleInterface.size());
         Assert.assertEquals(2, exampleInterfaceV2.size());
     }
+
+    @Test
+    public void shouldHandleCaseWhenGenericTypeIsSame() {
+        var container = builder
+                .registerSingleton(ExampleInterface.class, new ExampleClass())
+                .build();
+
+        var exampleInterface =  container.find(ExampleInterface.class, ExampleInterface.class);
+        Assert.assertNotNull(exampleInterface);
+    }
 }

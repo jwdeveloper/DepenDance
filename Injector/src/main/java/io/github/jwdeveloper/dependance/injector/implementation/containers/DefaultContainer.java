@@ -100,7 +100,13 @@ public class DefaultContainer implements Container, Registrable {
 
         var genericsType = genericParameters[0];
         var optional = injectionInfos.stream().filter(e -> e.getInjectionValueType().equals(genericsType)).findFirst();
-        if (optional.isEmpty()) {
+        if (optional.isEmpty())
+        {
+            if(_injection.equals(genericsType))
+            {
+                var lastInjectionInfo = injectionInfos.get(injectionInfos.size() - 1);
+                return find(lastInjectionInfo, null);
+            }
             throw new InjectionNotFoundException(Messages.INJECTION_NOT_FOUND_GENERICS_TYPE, _injection.getSimpleName(), genericsType.getTypeName());
         }
         return find(optional.get(), genericParameters);
