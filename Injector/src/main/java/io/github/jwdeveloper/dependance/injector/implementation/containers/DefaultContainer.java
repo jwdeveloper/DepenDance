@@ -64,7 +64,15 @@ public class DefaultContainer implements Container, Registrable {
                 return list;
             });
         } catch (Exception exception) {
-            throw new ContainerException(String.format(Messages.INJECTION_CANT_REGISTER, exception), exception);
+
+            var clazz = "";
+            if (registrationInfo._interface() != null) {
+                clazz += registrationInfo._interface().getName();
+            }
+            if (registrationInfo._interface() != null) {
+                clazz += " " + registrationInfo.implementation().getName();
+            }
+            throw new ContainerException(String.format(Messages.INJECTION_CANT_REGISTER, clazz), exception);
         }
         return true;
     }
@@ -85,8 +93,17 @@ public class DefaultContainer implements Container, Registrable {
             return result;
         }
 
-        var lastInjectionInfo = injectionInfos.get(injectionInfos.size() - 1);
-        return find(lastInjectionInfo, genericParameters);
+        if (genericParameters == null || genericParameters.length == 0) {
+            var lastInjectionInfo = injectionInfos.get(injectionInfos.size() - 1);
+            return find(lastInjectionInfo, genericParameters);
+        }
+
+        var genericsType = genericParameters[0];
+        var optional = injectionInfos.stream().filter(e -> e.getInjectionValueType().equals(genericsType)).findFirst();
+        if (optional.isEmpty()) {
+            throw new InjectionNotFoundException(Messages.INJECTION_NOT_FOUND_GENERICS_TYPE, _injection.getSimpleName(), genericsType.getTypeName());
+        }
+        return find(optional.get(), genericParameters);
     }
 
     private Object find(InjectionInfo injectionInfo, Type... genericParameters) {
@@ -113,12 +130,9 @@ public class DefaultContainer implements Container, Registrable {
         Class _searchedInterface = _interface;
         Object temp = null;
         var result = new ArrayList<T>();
-        for(var entry : injections.entrySet())
-        {
-            for(var injection : entry.getValue())
-            {
-                if(injection.hasInterface(_searchedInterface))
-                {
+        for (var entry : injections.entrySet()) {
+            for (var injection : entry.getValue()) {
+                if (injection.hasInterface(_searchedInterface)) {
                     temp = find(injection.getInjectionKeyType());
                     result.add((T) temp);
                 }

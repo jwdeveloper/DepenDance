@@ -25,6 +25,8 @@ package io.github.jwdeveloper.dependance.injector.implementation.utilites;
 public class Messages
 {
     public static final String INJECTION_NOT_FOUND ="Class %s has not been register to Dependency Injection container";
+    public static final String INJECTION_NOT_FOUND_GENERICS_TYPE ="Not found class %s with generic type %s in Dependency Injection container";
+
 
     public static final String INJECTION_ALREADY_EXISTS = "Class %s has been already register inside Dependency Injection container";
     public static final String INJECTION_CANT_BE_CREATED = "Can not create instance injection of type type %s";

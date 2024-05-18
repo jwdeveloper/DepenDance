@@ -129,4 +129,22 @@ public class ContainerTests extends ContainerTestBase {
         var listHolder = (ExampleWithList) container.find(ExampleWithList.class);
         Assert.assertEquals(2, listHolder.getExampleInterfaces().size());
     }
+
+    @Test
+    public void shouldRegister2DifferentLists() {
+        var container = builder
+                .registerSingleton(ExampleInterface.class, new ExampleClass())
+                .registerSingleton(ExampleInterface.class, new ExampleClass())
+                .registerSingleton(ExampleInterface.class, new ExampleClass())
+                .registerSingleton(ExampleInterfaceV2.class, new ExampleClassV2())
+                .registerSingleton(ExampleInterfaceV2.class, new ExampleClassV2())
+                .registerTransientList(ExampleInterface.class)
+                .registerTransientList(ExampleInterfaceV2.class)
+                .build();
+
+        var exampleInterface = (List<ExampleInterface>) container.find(List.class, ExampleInterface.class);
+        var exampleInterfaceV2 = (List<ExampleInterfaceV2>) container.find(List.class, ExampleInterfaceV2.class);
+        Assert.assertEquals(3, exampleInterface.size());
+        Assert.assertEquals(2, exampleInterfaceV2.size());
+    }
 }

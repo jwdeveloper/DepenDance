@@ -40,8 +40,8 @@ public class ContainerBenchmark
         GuiceContainer.run();
     }
 
-    @Warmup(iterations = 1)
-    @Measurement(iterations = 1)
+    @Warmup(iterations = 5)
+    @Measurement(iterations = 5)
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
