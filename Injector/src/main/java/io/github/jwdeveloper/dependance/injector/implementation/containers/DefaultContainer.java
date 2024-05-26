@@ -93,6 +93,8 @@ public class DefaultContainer implements Container, Registrable {
             return result;
         }
 
+
+
         if (genericParameters == null || genericParameters.length == 0) {
             var lastInjectionInfo = injectionInfos.get(injectionInfos.size() - 1);
             return find(lastInjectionInfo, genericParameters);
@@ -139,7 +141,7 @@ public class DefaultContainer implements Container, Registrable {
         for (var entry : injections.entrySet()) {
             for (var injection : entry.getValue()) {
                 if (injection.hasInterface(_searchedInterface)) {
-                    temp = find(injection.getInjectionKeyType());
+                    temp = find(injection.getInjectionKeyType(), injection.getInjectionValueType());
                     result.add((T) temp);
                 }
             }

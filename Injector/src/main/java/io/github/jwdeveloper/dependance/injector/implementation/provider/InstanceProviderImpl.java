@@ -24,6 +24,7 @@ package io.github.jwdeveloper.dependance.injector.implementation.provider;
 
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
 import io.github.jwdeveloper.dependance.injector.api.enums.LifeTime;
+import io.github.jwdeveloper.dependance.injector.api.enums.RegistrationType;
 import io.github.jwdeveloper.dependance.injector.api.models.InjectionInfo;
 import io.github.jwdeveloper.dependance.injector.api.provider.InstanceProvider;
 
@@ -56,8 +57,7 @@ public class InstanceProviderImpl implements InstanceProvider {
                 i++;
             }
             result = info.getInjectedConstructor().newInstance(info.getConstructorPayLoadTemp());
-            for (var injectedField : info.getInjectedFields())
-            {
+            for (var injectedField : info.getInjectedFields()) {
                 var fieldValue = container.find(injectedField.getType(), injectedField.getGenericType());
                 injectedField.set(result, fieldValue);
             }
@@ -70,6 +70,10 @@ public class InstanceProviderImpl implements InstanceProvider {
             case InterfaceAndProvider -> info.getRegistrationInfo().provider().apply(container);
             case List -> handleList(info, container);
         };
+        if (info.getRegistrationInfo().registrationType() == RegistrationType.InterfaceAndProvider) {
+            info.setInjectionValueType(result.getClass());
+        }
+
         info.setInstance(result);
         return result;
     }

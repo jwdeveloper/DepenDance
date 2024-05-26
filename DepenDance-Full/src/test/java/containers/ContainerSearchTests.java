@@ -36,13 +36,17 @@ public class ContainerSearchTests extends ContainerTestBase {
         var container = builder
                 .registerSingleton(ExampleCommonInterface.class, ExampleClass.class)
                 .registerSingleton(ExampleCommonInterface.class, ExampleClassV2.class)
+                .registerSingleton(ExampleCommonInterface.class, ExampleClassV3.class)
                 .build();
 
         //Act
-        var instances = container.findAllByInterface(ExampleCommonInterface.class);
+        var instances = container.findAllByInterface(ExampleCommonInterface.class).stream().toList();
 
         //Assert
-        Assert.assertEquals(2, instances.size());
+        Assert.assertEquals(3, instances.size());
+        Assert.assertEquals(ExampleClass.class, instances.get(0).getClass());
+        Assert.assertEquals(ExampleClassV2.class, instances.get(1).getClass());
+        Assert.assertEquals(ExampleClassV3.class, instances.get(2).getClass());
     }
 
     @Test
@@ -50,13 +54,18 @@ public class ContainerSearchTests extends ContainerTestBase {
         //Arrange
         var container = builder
                 .registerSingleton(ExampleCommonInterface.class, ExampleClass.class)
+                .registerSingleton(ExampleCommonInterface.class, ExampleClassV2.class)
+                .registerSingleton(ExampleCommonInterface.class, ExampleClassV3.class)
                 .build();
 
         //Act
-        var instances = container.findAllByInterface(SuperInterface.class);
+        var instances = container.findAllByInterface(SuperInterface.class).stream().toList();
 
         //Assert
-        Assert.assertEquals(1, instances.size());
+        Assert.assertEquals(3, instances.size());
+        Assert.assertEquals(ExampleClass.class, instances.get(0).getClass());
+        Assert.assertEquals(ExampleClassV2.class, instances.get(1).getClass());
+        Assert.assertEquals(ExampleClassV3.class, instances.get(2).getClass());
     }
 
 
@@ -65,28 +74,18 @@ public class ContainerSearchTests extends ContainerTestBase {
         //Arrange
         var container = builder
                 .registerSingleton(ExampleInterface.class, new ExampleClass())
+                .registerSingleton(ExampleInterface.class, new ExampleClassV2())
+                .registerSingleton(ExampleInterface.class, new ExampleClassV3())
                 .build();
 
         //Act
-        var instances = container.findAllByInterface(SuperInterface.class);
+        var instances = container.findAllByInterface(SuperInterface.class).stream().toList();
 
         //Assert
-        Assert.assertEquals(1, instances.size());
-    }
-
-    @Test
-    public void ShouldFindByRegistrationInterfaceInterface()  {
-        //Arrange
-        var container = builder
-                .registerSingleton(ExampleCommonInterface.class, ExampleClass.class)
-                .registerSingleton(ExampleCommonInterface.class, ExampleClassV2.class)
-                .build();
-
-        //Act
-        var instances = container.findAllByInterface(ExampleCommonInterface.class);
-
-        //Assert
-        Assert.assertEquals(2, instances.size());
+        Assert.assertEquals(3, instances.size());
+        Assert.assertEquals(ExampleClass.class, instances.get(0).getClass());
+        Assert.assertEquals(ExampleClassV2.class, instances.get(1).getClass());
+        Assert.assertEquals(ExampleClassV3.class, instances.get(2).getClass());
     }
 
 
@@ -99,10 +98,12 @@ public class ContainerSearchTests extends ContainerTestBase {
                 .build();
 
         //Act
-        var instances = container.findAllBySuperClass(ExampleSuperClass.class);
+        var instances = container.findAllBySuperClass(ExampleSuperClass.class).stream().toList();
 
         //Assert
         Assert.assertEquals(2, instances.size());
+        Assert.assertEquals(ExampleClass.class, instances.get(0).getClass());
+        Assert.assertEquals(ExampleClassV2.class, instances.get(1).getClass());
     }
 
     @Test
@@ -114,10 +115,12 @@ public class ContainerSearchTests extends ContainerTestBase {
                 .build();
 
         //Act
-        var instances = container.findAllBySuperClass(ExampleSuperSuperClass.class);
+        var instances = container.findAllBySuperClass(ExampleSuperSuperClass.class).stream().toList();
 
         //Assert
         Assert.assertEquals(2, instances.size());
+        Assert.assertEquals(ExampleClass.class, instances.get(0).getClass());
+        Assert.assertEquals(ExampleClassV2.class, instances.get(1).getClass());
     }
 
 
@@ -126,14 +129,17 @@ public class ContainerSearchTests extends ContainerTestBase {
         //Arrange
         var container = builder
                 .registerSingleton(ExampleClass.class)
+                .registerSingleton(ExampleClassV2.class)
                 .build();
 
         //Act
-        var instances = container.findAllByAnnotation(ExampleAnnotation.class);
+        var instances = container.findAllByAnnotation(ExampleAnnotation.class).stream().toList();
         var superSuperAnnotations = container.findAllByAnnotation(ExampleSuperSuperAnnotation.class);
 
         //Assert
-        Assert.assertEquals(1, instances.size());
-        Assert.assertEquals(1, superSuperAnnotations.size());
+        Assert.assertEquals(2, instances.size());
+        Assert.assertEquals(2, superSuperAnnotations.size());
+        Assert.assertEquals(ExampleClass.class, instances.get(0).getClass());
+        Assert.assertEquals(ExampleClassV2.class, instances.get(1).getClass());
     }
 }

@@ -91,13 +91,17 @@ public class ContainerTests extends ContainerTestBase {
         var container = builder
                 .registerSingleton(ExampleCommonInterface.class, ExampleClass.class)
                 .registerTransient(ExampleCommonInterface.class, ExampleClassV2.class)
+                .registerTransient(ExampleCommonInterface.class, ExampleClassV3.class)
                 .registerSingletonList(ExampleCommonInterface.class)
                 .build();
 
         shouldBeNotNull(container, ExampleCommonInterface.class);
 
         var result = (List<ExampleCommonInterface>) container.find(List.class, ExampleCommonInterface.class);
-        Assert.assertEquals(2, result.size());
+        Assert.assertEquals(3, result.size());
+        Assert.assertEquals(ExampleClass.class, result.get(0).getClass());
+        Assert.assertEquals(ExampleClassV2.class, result.get(1).getClass());
+        Assert.assertEquals(ExampleClassV3.class, result.get(2).getClass());
     }
 
     @Test
@@ -106,6 +110,7 @@ public class ContainerTests extends ContainerTestBase {
         var container = builder
                 .registerSingleton(ExampleCommonInterface.class, ExampleClass.class)
                 .registerTransient(ExampleCommonInterface.class, ExampleClassV2.class)
+
                 .registerTransientList(ExampleCommonInterface.class)
                 .build();
 
