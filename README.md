@@ -1,6 +1,3 @@
-
-This is exmaple
-
 <div align="center" >
 
 
