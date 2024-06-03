@@ -22,9 +22,43 @@
  */
 package io.github.jwdeveloper.dependance.api;
 
+import io.github.jwdeveloper.dependance.implementation.DependanceContainerBuilder;
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
 
-public interface DependanceContainer extends Container
-{
-     <T> T find(Class<T> type);
+import java.lang.reflect.Executable;
+import java.lang.reflect.Type;
+
+public interface DependanceContainer extends Container {
+
+    /**
+     * Finds an instance of the specified type that was previously registered in the container.
+     *
+     * @param <T>  the type of the instance to be retrieved
+     * @param type the Class object of the type to be retrieved
+     * @return an instance of the specified type, or null if not found
+     */
+    <T> T find(Class<T> type);
+
+    /**
+     * Resolves an array of object instances based on the provided parameter types.
+     *
+     * @param parametersTypes an array of Type objects representing the types of the parameters to be resolved
+     * @return an array of object instances corresponding to the specified parameter types
+     */
+    Object[] resolveParameters(Type[] parametersTypes);
+
+    /**
+     * Resolves and returns the parameters required for the given method or constructor.
+     *
+     * @param method an Executable object representing the method or constructor whose parameters are to be resolved
+     * @return an array of object instances representing the resolved parameters for the specified method or constructor
+     */
+    Object[] resolveParameters(Executable method);
+
+    /**
+     * Creates a builder for a sub-container that will be a child of this container.
+     *
+     * @return a DependanceContainerBuilder for building a sub-container
+     */
+    DependanceContainerBuilder createChildContainer();
 }

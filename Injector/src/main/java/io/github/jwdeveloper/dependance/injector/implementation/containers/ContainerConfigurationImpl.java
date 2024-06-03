@@ -40,7 +40,8 @@ import java.util.function.Function;
 public class ContainerConfigurationImpl implements ContainerConfiguration {
    private final List<RegistrationInfo> registrations = new ArrayList<>();
 
-   private final Set<Class<?>> registerdTypes = new HashSet<>();
+   private final Set<Class<?>> registeredTypes = new HashSet<>();
+
    private final List<ContainerEvents> events = new ArrayList<>();
 
    private final List<RegistrationInfo> registerAsList = new ArrayList<>();

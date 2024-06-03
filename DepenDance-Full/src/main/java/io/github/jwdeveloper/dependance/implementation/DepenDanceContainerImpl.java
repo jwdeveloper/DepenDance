@@ -22,15 +22,16 @@
  */
 package io.github.jwdeveloper.dependance.implementation;
 
+import io.github.jwdeveloper.dependance.Dependance;
 import io.github.jwdeveloper.dependance.api.DependanceContainer;
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
+import java.lang.reflect.*;
+import java.util.Arrays;
 import java.util.Collection;
 
-public class DepenDanceContainerImpl implements DependanceContainer
-{
+public class DepenDanceContainerImpl implements DependanceContainer {
 
     private final Container container;
 
@@ -38,15 +39,52 @@ public class DepenDanceContainerImpl implements DependanceContainer
         this.container = container;
     }
 
-    public <T> T find(Class<T> type)
-    {
-        return (T)container.find(type);
+    public <T> T find(Class<T> type) {
+        return (T) container.find(type);
     }
 
+    @Override
+    public Object[] resolveParameters(Type[] types) {
+        var output = new Object[types.length];
+        var index = 0;
+        for (var type : types) {
+            if (type instanceof ParameterizedType parameterizedType) {
+                output[index] = find((Class<?>) parameterizedType.getRawType(), parameterizedType.getActualTypeArguments());
+            } else {
+                output[index] = find((Class<?>) type);
+            }
+            index++;
+        }
+        return output;
+    }
+
+    @Override
+    public Object[] resolveParameters(Executable executable) {
+        var parameters = executable.getParameters();
+        var types = Arrays.stream(parameters)
+                .map(Parameter::getParameterizedType)
+                .toArray(Type[]::new);
+        return resolveParameters(types);
+    }
+
+    @Override
+    public DependanceContainerBuilder createChildContainer() {
+        return Dependance.newContainer()
+                .configure(config ->
+                {
+                    config.onInjection(onInjectionEvent ->
+                    {
+                        if (onInjectionEvent.hasOutput()) {
+                            return onInjectionEvent.output();
+                        }
+                        return this.find(onInjectionEvent.input(), onInjectionEvent.inputGenericParameters());
+                    });
+                });
+    }
 
     @Override
     public Object find(Class<?> type, Type... genericParameters) {
-        return container.find(type,genericParameters);
+        return container.find(type, genericParameters);
     }
 
     @Override

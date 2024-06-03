@@ -38,7 +38,8 @@ public class EventHandlerImpl implements EventHandler {
 
     @Override
     public boolean OnRegistration(OnRegistrationEvent event) {
-        for (var handler : events) {
+        for (int i = events.size() - 1; i >= 0; i--) {
+            var handler = events.get(i);
             var res = handler.OnRegistration(event);
             if (!res) {
                 return false;
@@ -50,7 +51,8 @@ public class EventHandlerImpl implements EventHandler {
     @Override
     public Object OnInjection(OnInjectionEvent event) {
         var output = event.output();
-        for (var handler : events) {
+        for (int i = events.size() - 1; i >= 0; i--) {
+            var handler = events.get(i);
             output = handler.OnInjection(new OnInjectionEvent(event.input(),
                     event.inputGenericParameters(),
                     event.injectionInfo(),

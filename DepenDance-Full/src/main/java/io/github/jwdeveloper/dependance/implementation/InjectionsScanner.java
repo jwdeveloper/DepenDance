@@ -64,7 +64,7 @@ public class InjectionsScanner {
 
         var containerConfig = containerBuilder.getDependanceContainerConfiguration();
         var config = (ContainerConfigurationImpl) containerConfig.getConfiguration();
-        var registeredTypes = config.getRegisterdTypes();
+        var registeredTypes = config.getRegisteredTypes();
         var autoScanEvents = containerConfig.getAutoScanEvents();
         for (var _class : classes) {
             if (registeredTypes.contains(_class)) {

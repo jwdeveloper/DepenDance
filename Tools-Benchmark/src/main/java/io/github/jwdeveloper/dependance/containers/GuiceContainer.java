@@ -25,8 +25,7 @@ package io.github.jwdeveloper.dependance.containers;
 import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.github.jwdeveloper.dependance.exampleClasses.ExampleClass;
-import io.github.jwdeveloper.dependance.exampleClasses.ExampleClass2;
+import io.github.jwdeveloper.dependance.exampleClasses.*;
 
 public class GuiceContainer extends AbstractModule
 {
@@ -34,6 +33,7 @@ public class GuiceContainer extends AbstractModule
     {
         Injector injector = Guice.createInjector(new GuiceContainer());
         injector.getInstance(ExampleClass.class);
+
     }
 
 
@@ -41,5 +41,9 @@ public class GuiceContainer extends AbstractModule
     protected void configure() {
         bind(ExampleClass.class);
         bind(ExampleClass2.class);
+        bind(ExampleClass3.class);
+        bind(ExampleClass4.class);
+        bind(ExampleClass5.class);
+        bind(ExampleClass6.class);
     }
 }

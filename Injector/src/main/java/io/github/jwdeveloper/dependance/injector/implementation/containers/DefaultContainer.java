@@ -11,7 +11,6 @@ import io.github.jwdeveloper.dependance.injector.api.factory.InjectionInfoFactor
 import io.github.jwdeveloper.dependance.injector.api.models.InjectionInfo;
 import io.github.jwdeveloper.dependance.injector.api.models.RegistrationInfo;
 import io.github.jwdeveloper.dependance.injector.api.provider.InstanceProvider;
-import io.github.jwdeveloper.dependance.injector.api.search.SearchAgent;
 import io.github.jwdeveloper.dependance.injector.implementation.utilites.Messages;
 
 import java.lang.annotation.Annotation;
@@ -94,20 +93,26 @@ public class DefaultContainer implements Container, Registrable {
         }
 
 
-
         if (genericParameters == null || genericParameters.length == 0) {
             var lastInjectionInfo = injectionInfos.get(injectionInfos.size() - 1);
             return find(lastInjectionInfo, genericParameters);
         }
-
         var genericsType = genericParameters[0];
         var optional = injectionInfos.stream().filter(e -> e.getInjectionValueType().equals(genericsType)).findFirst();
-        if (optional.isEmpty())
-        {
-            if(_injection.equals(genericsType))
-            {
+        if (optional.isEmpty()) {
+            if (_injection.equals(genericsType)) {
                 var lastInjectionInfo = injectionInfos.get(injectionInfos.size() - 1);
                 return find(lastInjectionInfo, null);
+            }
+            var onInjectionEvent = new OnInjectionEvent(_injection,
+                    genericParameters,
+                    null,
+                    null,
+                    injections,
+                    this);
+            var result = eventHandler.OnInjection(onInjectionEvent);
+            if (result != null) {
+                return result;
             }
             throw new InjectionNotFoundException(Messages.INJECTION_NOT_FOUND_GENERICS_TYPE, _injection.getSimpleName(), genericsType.getTypeName());
         }
@@ -134,7 +139,6 @@ public class DefaultContainer implements Container, Registrable {
 
     @Override
     public <T> Collection<T> findAllByInterface(Class<T> _interface) {
-
         Class _searchedInterface = _interface;
         Object temp = null;
         var result = new ArrayList<T>();

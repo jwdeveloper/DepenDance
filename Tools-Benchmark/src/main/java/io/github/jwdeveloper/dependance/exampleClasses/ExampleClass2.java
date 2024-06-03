@@ -25,4 +25,9 @@ package io.github.jwdeveloper.dependance.exampleClasses;
 public class ExampleClass2
 {
 
+    private ExampleClass3 exampleClass3;
+
+    public ExampleClass2(ExampleClass3 exampleClass3) {
+        this.exampleClass3 = exampleClass3;
+    }
 }

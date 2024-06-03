@@ -198,7 +198,7 @@ public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder
     }
 
     private void addRegisteredType(Class<?> type) {
-        config.getRegisterdTypes().add(type);
+        config.getRegisteredTypes().add(type);
     }
 
     public Container build() {

@@ -24,17 +24,33 @@ package io.github.jwdeveloper.dependance.containers;
 
 import io.github.jwdeveloper.dependance.ContainerBenchmark;
 import io.github.jwdeveloper.dependance.Dependance;
-import io.github.jwdeveloper.dependance.exampleClasses.ExampleClass;
-import io.github.jwdeveloper.dependance.exampleClasses.ExampleClass2;
+import io.github.jwdeveloper.dependance.exampleClasses.*;
 
-public class DepenDanceContainer
-{
-    public static void run()
-    {
+public class DepenDanceContainer {
+    public static void run() {
         var container = Dependance.newContainer()
                 .registerTransient(ExampleClass.class)
                 .registerTransient(ExampleClass2.class)
+                .registerTransient(ExampleClass3.class)
+                .registerTransient(ExampleClass4.class)
+                .registerTransient(ExampleClass5.class)
+                .registerTransient(ExampleClass6.class)
                 .build();
         container.find(ExampleClass.class);
+    }
+
+    public static void main(String[] args) throws InterruptedException {
+
+        var now = System.nanoTime();
+        var iteration = 0;
+        while (true) {
+            now = System.nanoTime();
+            run();
+            var endTime = System.nanoTime();
+            var delta = endTime - now;
+            System.out.println(iteration + " Action performed in " + delta / 1_000_000f + " MS");
+            Thread.sleep(10);
+            iteration++;
+        }
     }
 }
