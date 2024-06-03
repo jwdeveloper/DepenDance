@@ -5,7 +5,7 @@ import io.github.jwdeveloper.dependance.api.DependanceContainer;
 import org.junit.Assert;
 import tutorial.models.*;
 
-public class _7_Overriding {
+public class _07_Overriding {
     public static void main(String[] args) {
 
         DependanceContainer container = Dependance.newContainer()

@@ -32,7 +32,7 @@ import tutorial.models.ExampleClass;
 import tutorial.models.OnlineShop;
 
 
-public class _6_AutoScan {
+public class _06_AutoScan {
 
     /**
      * To avoid boring manually registering Types to container
@@ -47,7 +47,7 @@ public class _6_AutoScan {
          *  scanner is looking for all Method and Classes that are having @Injection annotation
          */
 
-        Class<?> rootClass = _6_AutoScan.class;
+        Class<?> rootClass = _06_AutoScan.class;
 
         DependanceContainer container = Dependance.newContainer()
                 .scan(rootClass)

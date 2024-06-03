@@ -5,7 +5,7 @@ import io.github.jwdeveloper.dependance.api.DependanceContainer;
 import io.github.jwdeveloper.dependance.injector.api.annotations.Inject;
 import org.junit.Assert;
 
-public class _8_ManyConstructors
+public class _08_ManyConstructors
 {
     /**
      *  By the default the first constructor is always targeted for injecting parameters

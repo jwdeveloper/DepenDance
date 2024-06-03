@@ -25,44 +25,31 @@ package tutorial;
 import io.github.jwdeveloper.dependance.api.DependanceContainer;
 import tutorial.models.Config;
 import tutorial.models.LocalShop;
+import tutorial.models.OnlineShop;
 import tutorial.models.Shop;
-import tutorial.models.ShopManager;
 import io.github.jwdeveloper.dependance.Dependance;
 import org.junit.Assert;
 
 import java.util.List;
-import java.util.Map;
 
-public class _1_Basic {
-
-
+public class _03_Lists {
     public static void main(String[] args) {
-        /*
-           - Singleton There will be only one instance of object created by container
-           - Transient everytime `container.find` is used new instance of object is created
-         */
-
         DependanceContainer container = Dependance.newContainer()
-                .registerTransient(Shop.class, LocalShop.class) //registration interface to implementation
                 .registerSingleton(Config.class)
-                .registerSingleton(ShopManager.class)
+                .registerTransient(Shop.class, OnlineShop.class)
+                .registerTransient(Shop.class, LocalShop.class)
+                .registerTransientList(Shop.class)
                 .build();
 
 
-        ShopManager shopManager1 = container.find(ShopManager.class);
-        ShopManager shopManager2 = container.find(ShopManager.class);
-
-        Shop shop1 = container.find(Shop.class);
-        Shop shop2 = container.find(Shop.class);
+        List<Shop> shops = (List<Shop>) container.find(List.class, Shop.class);
 
 
-        Assert.assertEquals(shopManager1, shopManager2);
-        System.out.println("There always same instance of shop manager");
-
-        Assert.assertEquals(shopManager1.getConfig(), shopManager2.getConfig());
-        System.out.println("There always same instance of config");
-
-        Assert.assertNotEquals(shop1, shop2);
-        System.out.println("There are different instances of shop");
+        for (var shop : shops) {
+            System.out.println("Shops: " + shop.getClass().getSimpleName());
+        }
+        Assert.assertEquals(2, shops.size());
     }
+
+
 }

@@ -28,7 +28,7 @@ import tutorial.models.LocalShop;
 import io.github.jwdeveloper.dependance.Dependance;
 import org.junit.Assert;
 
-public class _2_Object_Instances
+public class _02_Object_Instances
 {
     public static void main(String[] args)
     {

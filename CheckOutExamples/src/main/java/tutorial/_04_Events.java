@@ -30,15 +30,15 @@ import tutorial.models.OnlineShop;
 import tutorial.models.Shop;
 import io.github.jwdeveloper.dependance.Dependance;
 
-public class _4_Events {
+public class _04_Events {
     public static void main(String[] args) {
         DependanceContainer container = Dependance.newContainer()
                 .registerSingleton(Shop.class, LocalShop.class)
                 .registerSingleton(Shop.class, OnlineShop.class)
                 .configure(config ->
                 {
-                    config.onInjection(_4_Events::onInjection);
-                    config.onRegistration(_4_Events::onRegistration);
+                    config.onInjection(_04_Events::onInjection);
+                    config.onRegistration(_04_Events::onRegistration);
                 })
                 .build();
 

@@ -42,44 +42,37 @@ public class TutorialDecorator implements DescriptionDecorator {
     }
 
     @Override
-    public void decorate(Element root, ElementFactory factory)
-    {
-        try
-        {
+    public void decorate(Element root, ElementFactory factory) {
+        try {
             var path = Paths.get(rootPath, "CheckOutExamples", "src", "main", "java", "tutorial");
             var files = loadFileNamesAndContent(path.toString());
 
 
-         //   root.addElement(addContent(files.keySet(), factory));
+            //   root.addElement(addContent(files.keySet(), factory));
             root.addElement(factory.breakElement());
-            for(var entry : files.entrySet())
-            {
+            for (var entry : files.entrySet()) {
 
-                var text =factory.textElement("### "+entry.getKey());
-                var codeElement = factory.codeElement(entry.getValue(),"java");
+                var text = factory.textElement("### " + entry.getKey());
+                var codeElement = factory.codeElement(entry.getValue(), "java");
                 root.addElement(text, codeElement);
             }
 
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }
 
-    public Element addContent(Set<String> names, ElementFactory factory)
-    {
-        var container= factory.containerElement("left");
+    public Element addContent(Set<String> names, ElementFactory factory) {
+        var container = factory.containerElement("left");
         container.addElement(factory.breakElement());
         container.addElement(factory.textElement("### Content"));
         var counter = 1;
 
-        for(var name : names)
-        {
+        for (var name : names) {
 
-            var path = "https://github.com/jwdeveloper/DepenDance#"+name.replace(" ","-");
-            var title = "."+counter+" "+name;
-            var link = factory.linkElement(title,path);
+            var path = "https://github.com/jwdeveloper/DepenDance#" + name.replace(" ", "-");
+            var title = "." + counter + " " + name;
+            var link = factory.linkElement(title, path);
 
             container.addElement(factory.breakElement());
             container.addElement(link);
@@ -89,9 +82,8 @@ public class TutorialDecorator implements DescriptionDecorator {
     }
 
 
-
     private Map<String, String> loadFileNamesAndContent(String directoryPath) throws IOException {
-        Map<String, String> fileContentMap = new LinkedHashMap<>();
+        Map<String, String> fileContentMap = new TreeMap<>();
         Path dirPath = Paths.get(directoryPath);
 
         Files.walkFileTree(dirPath, EnumSet.noneOf(FileVisitOption.class), Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
@@ -100,15 +92,16 @@ public class TutorialDecorator implements DescriptionDecorator {
                 if (!attrs.isDirectory()) {
                     String fileName = file.getFileName().toString();
 
-                    if(!fileName.startsWith("_"))
-                    {
+                    if (!fileName.startsWith("_")) {
                         return FileVisitResult.CONTINUE;
                     }
+
+
                     fileName = formatSectionName(fileName);
 
-                    var fileContent=  new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
+                    var fileContent = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
                     String content = transformContent(fileContent);
-                    fileContentMap.put(fileName, content);
+                    fileContentMap.put( fileName, content);
                 }
                 return FileVisitResult.CONTINUE;
             }
@@ -122,25 +115,21 @@ public class TutorialDecorator implements DescriptionDecorator {
         return fileContentMap;
     }
 
-    private String transformContent(String input)
-    {
+    private String transformContent(String input) {
 
         var index = input.indexOf("public class");
-        if(index == -1)
-        {
+        if (index == -1) {
             return "Main method not found.";
         }
 
-        var lastIndex = input.lastIndexOf("}")+1;
-        var parsed =  input.substring(index,lastIndex);
+        var lastIndex = input.lastIndexOf("}") + 1;
+        var parsed = input.substring(index, lastIndex);
         return parsed;
     }
 
-    private String formatSectionName(String name)
-    {
-        var formatted = name.replace("_"," ").replace(".java","");
-        formatted =  formatted.substring(2);
-        formatted = formatted.replaceFirst(" ","");
+    private String formatSectionName(String name) {
+        var formatted = name.replace("_", " ").replace(".java", "");
+        formatted = formatted.replaceFirst(" ", "");
         return formatted;
     }
 }

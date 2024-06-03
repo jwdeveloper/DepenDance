@@ -23,15 +23,17 @@
 package tutorial;
 
 import io.github.jwdeveloper.dependance.Dependance;
+import lombok.Getter;
 import org.junit.Assert;
 import tutorial.models.*;
 
 
-public class _5_Generic_Types {
+public class _05_Generic_Types {
 
     public static void main(String[] args) {
 
         var container = Dependance.newContainer()
+                .registerTransient(ExampleGenericsTypes.class)
                 .configure(configuration ->
                 {
                     /*
@@ -42,18 +44,15 @@ public class _5_Generic_Types {
 
                     configuration.onInjection(injection ->
                     {
-                        if(!injection.input().isAssignableFrom(Repository.class))
-                        {
+                        if (!injection.input().isAssignableFrom(Repository.class)) {
                             return injection.output();
                         }
 
-                        var genericParameter =injection.inputGenericParameters()[0];
-                        if(genericParameter.equals(OnlineShop.class))
-                        {
+                        var genericParameter = injection.inputGenericParameters()[0];
+                        if (genericParameter.equals(OnlineShop.class)) {
                             return new Repository<OnlineShop>();
                         }
-                        if(genericParameter.equals(LocalShop.class))
-                        {
+                        if (genericParameter.equals(LocalShop.class)) {
                             return new Repository<LocalShop>();
                         }
                         return new Repository();
@@ -64,11 +63,26 @@ public class _5_Generic_Types {
 
 
         //first parameter is class, second one is its generic parameter
-        var onlineShopRepo = container.find(Repository.class, OnlineShop.class);
-        var localShopRepo = container.find(Repository.class, LocalShop.class);
+        var exampleGenericsTypes = container.find(ExampleGenericsTypes.class);
 
-        Assert.assertNotNull(onlineShopRepo);
-        Assert.assertNotNull(localShopRepo);
+        Assert.assertNotNull(exampleGenericsTypes);
+        Assert.assertNotNull(exampleGenericsTypes.getLocalShopRepository());
+        Assert.assertNotNull(exampleGenericsTypes.getOnlineShopRepository());
+
+    }
+
+    public static class ExampleGenericsTypes {
+
+        @Getter
+        private Repository<OnlineShop> onlineShopRepository;
+        @Getter
+        private Repository<LocalShop> localShopRepository;
+
+        public ExampleGenericsTypes(Repository<OnlineShop> onlineShopRepository,
+                                    Repository<LocalShop> localShopRepository) {
+            this.onlineShopRepository = onlineShopRepository;
+            this.localShopRepository = localShopRepository;
+        }
     }
 
 
