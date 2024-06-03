@@ -1,7 +1,4 @@
-Robie zmiany w repo asdasdasdsadasdasdadasd
-asdadasd
-adada
-dad
+
 <div align="center" >
 
 
@@ -66,7 +63,7 @@ dad
     <dependency>
         <groupid>com.github.jwdeveloper.DepenDance</groupid>
         <artifactid>DepenDance-Full</artifactid>
-        <version>[Replace with current version]</version>
+        <version>0.0.15-Release</version>
     </dependency>     
 ```
 
@@ -116,6 +113,8 @@ Lightweight dependency injection container that is both small and performance ef
 [09 Fields](https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#09-Fields) 
 
 [10 Methods](https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#10-Methods) 
+
+[11 ResolveParameters](https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#11-ResolveParameters) 
 
 
 
@@ -522,6 +521,58 @@ public class _10_Methods
         public void sayIt() {
             System.out.println("Hello world!");
         }
+    }
+} 
+```
+### 11 ResolveParameters
+
+```java
+public class _11_ResolveParameters {
+    public static void main(String[] args) throws Exception {
+        DependanceContainer container = Dependance.newContainer()
+                .registerTransient(_11_ResolveParameters.ExampleWithGenerics.class)
+                .registerTransient(_11_ResolveParameters.ExampleClass.class)
+                .configure(config ->
+                {
+                    config.onInjection(onInjectionEvent ->
+                    {
+                        if (!onInjectionEvent.input().equals(ExampleWithGenerics.class)) {
+                            return onInjectionEvent.output();
+                        }
+
+                        var geneicsTyles = onInjectionEvent.inputGenericParameters()[0];
+                        if (!String.class.equals(geneicsTyles)) {
+                            return onInjectionEvent.output();
+                        }
+                        return new ExampleWithGenerics<String>();
+                    });
+                })
+                .build();
+
+        var method = _11_ResolveParameters.class.getDeclaredMethod(
+                "sayHello",
+                _11_ResolveParameters.ExampleWithGenerics.class,
+                _11_ResolveParameters.ExampleClass.class);
+
+        var parameters = container.resolveParameters(method);
+
+        method.invoke(null, parameters);
+    }
+
+
+    public static void sayHello(_11_ResolveParameters.ExampleWithGenerics<String> exampleService,
+                                _11_ResolveParameters.ExampleClass exampleClass) {
+
+        System.out.println("Hello world");
+    }
+
+
+    public static class ExampleWithGenerics<T> {
+
+    }
+
+    public static class ExampleClass {
+
     }
 } 
 ```
