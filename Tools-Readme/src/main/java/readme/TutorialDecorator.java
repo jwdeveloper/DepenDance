@@ -47,11 +47,15 @@ public class TutorialDecorator implements DescriptionDecorator {
             var path = Paths.get(rootPath, "CheckOutExamples", "src", "main", "java", "tutorial");
             var files = loadFileNamesAndContent(path.toString());
 
-
-            //   root.addElement(addContent(files.keySet(), factory));
             root.addElement(factory.breakElement());
             for (var entry : files.entrySet()) {
+                var key = entry.getKey().replace(" ", "-");
+                root.addElement(factory.linkElement(entry.getKey(), "https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#" + key));
+                root.addElement(factory.breakElement());
+            }
 
+            root.addElement(factory.breakElement());
+            for (var entry : files.entrySet()) {
                 var text = factory.textElement("### " + entry.getKey());
                 var codeElement = factory.codeElement(entry.getValue(), "java");
                 root.addElement(text, codeElement);
@@ -101,7 +105,7 @@ public class TutorialDecorator implements DescriptionDecorator {
 
                     var fileContent = new String(Files.readAllBytes(file), StandardCharsets.UTF_8);
                     String content = transformContent(fileContent);
-                    fileContentMap.put( fileName, content);
+                    fileContentMap.put(fileName, content);
                 }
                 return FileVisitResult.CONTINUE;
             }

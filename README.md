@@ -91,7 +91,29 @@ Lightweight dependency injection container that is both small and performance ef
 - [x] Highly customizable, adjust container with build in [events](#events) system
 
 
-<h1>Examples</h1>
+<h1>Tutorial</h1>
+
+
+[01 Basic](https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#01-Basic) 
+
+[02 Object Instances](https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#02-Object-Instances) 
+
+[03 Lists](https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#03-Lists) 
+
+[04 Events](https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#04-Events) 
+
+[05 Generic Types](https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#05-Generic-Types) 
+
+[06 AutoScan](https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#06-AutoScan) 
+
+[07 Overriding](https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#07-Overriding) 
+
+[08 ManyConstructors](https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#08-ManyConstructors) 
+
+[09 Fields](https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#09-Fields) 
+
+[10 Methods](https://github.com/jwdeveloper/DepenDance?tab=readme-ov-file#10-Methods) 
+
 
 
 ### 01 Basic
@@ -236,6 +258,7 @@ public class _05_Generic_Types {
     public static void main(String[] args) {
 
         var container = Dependance.newContainer()
+                .registerTransient(ExampleGenericsTypes.class)
                 .configure(configuration ->
                 {
                     /*
@@ -246,18 +269,15 @@ public class _05_Generic_Types {
 
                     configuration.onInjection(injection ->
                     {
-                        if(!injection.input().isAssignableFrom(Repository.class))
-                        {
+                        if (!injection.input().isAssignableFrom(Repository.class)) {
                             return injection.output();
                         }
 
-                        var genericParameter =injection.inputGenericParameters()[0];
-                        if(genericParameter.equals(OnlineShop.class))
-                        {
+                        var genericParameter = injection.inputGenericParameters()[0];
+                        if (genericParameter.equals(OnlineShop.class)) {
                             return new Repository<OnlineShop>();
                         }
-                        if(genericParameter.equals(LocalShop.class))
-                        {
+                        if (genericParameter.equals(LocalShop.class)) {
                             return new Repository<LocalShop>();
                         }
                         return new Repository();
@@ -268,11 +288,26 @@ public class _05_Generic_Types {
 
 
         //first parameter is class, second one is its generic parameter
-        var onlineShopRepo = container.find(Repository.class, OnlineShop.class);
-        var localShopRepo = container.find(Repository.class, LocalShop.class);
+        var exampleGenericsTypes = container.find(ExampleGenericsTypes.class);
 
-        Assert.assertNotNull(onlineShopRepo);
-        Assert.assertNotNull(localShopRepo);
+        Assert.assertNotNull(exampleGenericsTypes);
+        Assert.assertNotNull(exampleGenericsTypes.getLocalShopRepository());
+        Assert.assertNotNull(exampleGenericsTypes.getOnlineShopRepository());
+
+    }
+
+    public static class ExampleGenericsTypes {
+
+        @Getter
+        private Repository<OnlineShop> onlineShopRepository;
+        @Getter
+        private Repository<LocalShop> localShopRepository;
+
+        public ExampleGenericsTypes(Repository<OnlineShop> onlineShopRepository,
+                                    Repository<LocalShop> localShopRepository) {
+            this.onlineShopRepository = onlineShopRepository;
+            this.localShopRepository = localShopRepository;
+        }
     }
 
 
