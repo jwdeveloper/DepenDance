@@ -2,6 +2,8 @@ package io.github.jwdeveloper.dependance.injector.implementation.containers;
 
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
 import io.github.jwdeveloper.dependance.injector.api.containers.Registrable;
+import io.github.jwdeveloper.dependance.injector.api.enums.LifeTime;
+import io.github.jwdeveloper.dependance.injector.api.enums.RegistrationType;
 import io.github.jwdeveloper.dependance.injector.api.events.EventHandler;
 import io.github.jwdeveloper.dependance.injector.api.events.events.OnInjectionEvent;
 import io.github.jwdeveloper.dependance.injector.api.events.events.OnRegistrationEvent;
@@ -37,7 +39,10 @@ public class DefaultContainer implements Container, Registrable {
         this.logger = logger;
         this.injectionInfoFactory = injectionInfoFactory;
         this.injections = new HashMap<>();
-
+        register(new RegistrationInfo(Container.class, this.getClass(), container ->
+        {
+            return this;
+        }, LifeTime.SINGLETON, RegistrationType.InterfaceAndProvider));
         for (var registration : registrationInfos) {
             register(registration);
         }

@@ -45,7 +45,7 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
 
     private final DecoratorBuilder decoratorBuilder;
     private final JarScannerOptions options;
-    private List<JarScanner> additionalScanners = new ArrayList<>();
+    private final List<JarScanner> additionalScanners = new ArrayList<>();
     private boolean scanEnabled;
 
     @Getter
@@ -109,10 +109,12 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
         }
         var scanner = new InjectionsScanner(this, options, jarScanner);
         var toInitialize = scanner.scanAndRegister();
+
+        registerSingleton(DependanceContainer.class, DepenDanceContainerImpl::new);
         var container = super.build();
         for (var clazz : toInitialize) {
             container.find(clazz);
         }
-        return new DepenDanceContainerImpl(container);
+        return (DependanceContainer) container.find(DependanceContainer.class);
     }
 }
