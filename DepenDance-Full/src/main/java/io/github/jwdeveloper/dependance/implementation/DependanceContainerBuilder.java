@@ -99,7 +99,7 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
     public DependanceContainer build() {
         var decorator = decoratorBuilder.build();
         configure(config -> config.onEvent(decorator));
-
+        registerSingleton(DependanceContainer.class, DepenDanceContainerImpl::new);
         if (!scanEnabled) {
             return new DepenDanceContainerImpl(super.build());
         }
@@ -110,7 +110,6 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
         var scanner = new InjectionsScanner(this, options, jarScanner);
         var toInitialize = scanner.scanAndRegister();
 
-        registerSingleton(DependanceContainer.class, DepenDanceContainerImpl::new);
         var container = super.build();
         for (var clazz : toInitialize) {
             container.find(clazz);
