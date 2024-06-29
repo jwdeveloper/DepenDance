@@ -25,6 +25,7 @@ package io.github.jwdeveloper.dependance.injector.implementation.factory;
 import io.github.jwdeveloper.dependance.injector.api.annotations.Inject;
 import io.github.jwdeveloper.dependance.injector.api.exceptions.ContainerException;
 import io.github.jwdeveloper.dependance.injector.api.exceptions.DeathCycleException;
+import io.github.jwdeveloper.dependance.injector.api.exceptions.NoConsturctorException;
 import io.github.jwdeveloper.dependance.injector.api.factory.InjectionInfoFactory;
 import io.github.jwdeveloper.dependance.injector.api.models.InjectionInfo;
 import io.github.jwdeveloper.dependance.injector.api.models.RegistrationInfo;
@@ -47,7 +48,6 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
             case InterfaceAndProvider -> InterfaceAndProviderStrategy(info);
             case List -> ListStrategy(info);
         };
-
     }
 
     private Pair<Class<?>, InjectionInfo> OnlyImplStrategy(RegistrationInfo info) throws Exception {
@@ -79,7 +79,7 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         var constructor = getConstructor(impl);
         throwIfCycleDependency(constructor, impl, impl);
 
-        var extendedTypes = getExtentedTypes(impl);
+        var extendedTypes = getExtendedTypes(impl);
         var implementedTypes = getImplementedTypes(impl);
 
         var annotationsClasses = new HashSet<>(extendedTypes);
@@ -109,7 +109,7 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         result.setInjectionValueType(Function.class);
 
 
-        var extendedTypes = getExtentedTypes(_interface);
+        var extendedTypes = getExtendedTypes(_interface);
         var implementedTypes = getImplementedTypes(_interface);
         implementedTypes.add(_interface);
         extendedTypes.add(_interface);
@@ -170,7 +170,7 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         return annotations;
     }
 
-    private Set<Class<?>> getExtentedTypes(Class<?> type) {
+    private Set<Class<?>> getExtendedTypes(Class<?> type) {
         var superClassTypes = new HashSet<Class<?>>();
         var subClass = type.getSuperclass();
         while (subClass != null && !subClass.equals(Object.class)) {
@@ -192,7 +192,7 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
 
             return consturctor;
         }
-        throw new ContainerException(Messages.INJECTION_USE_ANNOTATION_WITH_MORE_CONSTUROCTORS);
+        throw new NoConsturctorException(Messages.INJECTION_USE_ANNOTATION_WITH_MORE_CONSTUROCTORS);
     }
 
     private Field[] getInjectedFields(Class<?> _class) {
@@ -214,8 +214,15 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
             if (param.isInterface()) {
                 continue;
             }
-            var ctr = getConstructor(param);
-            throwIfCycleDependency(ctr, param, root);
+
+            try {
+                var ctr = getConstructor(param);
+                throwIfCycleDependency(ctr, param, root);
+            }
+            catch (NoConsturctorException e)
+            {
+             //pass
+            }
         }
     }
 

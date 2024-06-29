@@ -73,7 +73,7 @@ public class DefaultContainer implements Container, Registrable {
             if (registrationInfo._interface() != null) {
                 clazz += registrationInfo._interface().getName();
             }
-            if (registrationInfo._interface() != null) {
+            if (registrationInfo.implementation() != null) {
                 clazz += " " + registrationInfo.implementation().getName();
             }
             throw new ContainerException(String.format(Messages.INJECTION_CANT_REGISTER, clazz), exception);
