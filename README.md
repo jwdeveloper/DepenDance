@@ -71,15 +71,15 @@ Depandance is the dependency injection container library. Is is quite compacts a
 you can find in the more popular DI container libraries. 
 
 
-#### What are the dependecies?
+## What are the dependecies?
 Dependecies is the fancy word for a class consturctor parameters.
 So the objects certain class depends on/
 
-#### What is the dependecy injection?
+## What is the dependecy injection?
 Is is one of the programming design patters, watch great video about it
 [Video](https://www.youtube.com/watch?v=J1f5b4vcxCQ)
 
-#### What is the dependecy injection container?
+## What is the dependecy injection container?
 It is library that helps to create instance of object with
 all its `dependecines`. At the beggining you need to register the dependecines classess
 to the container, then any class that was registed, can be obtained for the container.
