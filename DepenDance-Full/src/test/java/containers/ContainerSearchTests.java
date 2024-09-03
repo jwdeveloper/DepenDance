@@ -102,8 +102,8 @@ public class ContainerSearchTests extends ContainerTestBase {
 
         //Assert
         Assert.assertEquals(2, instances.size());
-        Assert.assertEquals(ExampleClass.class, instances.get(0).getClass());
-        Assert.assertEquals(ExampleClassV2.class, instances.get(1).getClass());
+        Assert.assertEquals(ExampleClass.class, instances.get(1).getClass());
+        Assert.assertEquals(ExampleClassV2.class, instances.get(0).getClass());
     }
 
     @Test
@@ -119,8 +119,8 @@ public class ContainerSearchTests extends ContainerTestBase {
 
         //Assert
         Assert.assertEquals(2, instances.size());
-        Assert.assertEquals(ExampleClass.class, instances.get(0).getClass());
-        Assert.assertEquals(ExampleClassV2.class, instances.get(1).getClass());
+        Assert.assertEquals(ExampleClass.class, instances.get(1).getClass());
+        Assert.assertEquals(ExampleClassV2.class, instances.get(0).getClass());
     }
 
 
@@ -139,7 +139,7 @@ public class ContainerSearchTests extends ContainerTestBase {
         //Assert
         Assert.assertEquals(2, instances.size());
         Assert.assertEquals(2, superSuperAnnotations.size());
-        Assert.assertEquals(ExampleClass.class, instances.get(0).getClass());
-        Assert.assertEquals(ExampleClassV2.class, instances.get(1).getClass());
+        Assert.assertEquals(ExampleClass.class, instances.get(1).getClass());
+        Assert.assertEquals(ExampleClassV2.class, instances.get(0).getClass());
     }
 }
