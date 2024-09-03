@@ -33,16 +33,32 @@ import common.classess.exceptionsExamples.deathcycle.CycleDependencyExample;
 import io.github.jwdeveloper.dependance.injector.api.exceptions.ContainerException;
 import io.github.jwdeveloper.dependance.injector.api.exceptions.DeathCycleException;
 import io.github.jwdeveloper.dependance.injector.api.exceptions.InjectionNotFoundException;
+import io.github.jwdeveloper.dependance.injector.api.exceptions.NoConsturctorException;
 import io.github.jwdeveloper.dependance.injector.implementation.utilites.Messages;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.util.logging.Logger;
+
 public class ContainerExceptionsTests extends ContainerTestBase {
+
+    @Test
+    public void shouldThrowWhenClassHasNoConstructor() {
+        shouldThrows(NoConsturctorException.class, () ->
+        {
+            var container = builder()
+                    .registerSingleton(Logger.class)
+                    .build();
+            container.find(Logger.class);
+        });
+    }
+
+
     @Test
     public void shouldReturnNullWhenNotRegistered() {
         shouldThrows(InjectionNotFoundException.class, () ->
         {
-            var container = builder.build();
+            var container = builder().build();
             container.find(ExampleClass.class);
         });
     }
@@ -51,7 +67,7 @@ public class ContainerExceptionsTests extends ContainerTestBase {
     public void shouldThrowWhenDeathCycle() {
         shouldThrows(DeathCycleException.class, () ->
         {
-            builder.registerSingleton(CycleDependencyExample.class)
+            builder().registerSingleton(CycleDependencyExample.class)
                     .registerSingleton(A.class)
                     .registerSingleton(B.class)
                     .registerSingleton(C.class)
@@ -63,7 +79,7 @@ public class ContainerExceptionsTests extends ContainerTestBase {
     public void shouldThrowWhenThereAreMoreConstructorsWithoutAnnotation() {
         Assert.assertThrows(Messages.INJECTION_USE_ANNOTATION_WITH_MORE_CONSTUROCTORS, ContainerException.class, () ->
         {
-            builder.registerSingleton(ClassWithMoreConstructors.class)
+            builder().registerSingleton(ClassWithMoreConstructors.class)
                     .build();
         });
     }
@@ -73,7 +89,7 @@ public class ContainerExceptionsTests extends ContainerTestBase {
 
         Assert.assertThrows(Messages.INJECTION_CANT_BE_CREATED, ContainerException.class, () ->
         {
-            var container = builder.registerSingleton(ClassWithParamterNotRegistered.class)
+            var container = builder().registerSingleton(ClassWithParamterNotRegistered.class)
                     .build();
             container.find(ClassWithParamterNotRegistered.class);
         });

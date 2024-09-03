@@ -31,13 +31,11 @@ import org.junit.Before;
 
 
 public abstract class ContainerTestBase {
-    public static DependanceContainerBuilder builder;
 
-    @Before
-    public  void before() {
-        builder = Dependance.newContainer();
+
+    public DependanceContainerBuilder builder() {
+        return Dependance.newContainer();
     }
-
 
     protected void shouldBeNull(Container container, Class<?> clazz) {
         var instance1 = container.find(clazz);
@@ -66,33 +64,29 @@ public abstract class ContainerTestBase {
         Assert.assertEquals(instance, instance1);
     }
 
-    protected void shouldThrows(Class<? extends Throwable> throwablClass, Runnable action)
-    {
-        try
-        {
+    protected void shouldThrows(Class<? extends Throwable> throwablClass, Runnable action) {
+        try {
             action.run();
-        }
-        catch (Exception e)
-        {
-            if(throwablClass.equals(e.getClass()))
-            {
+        } catch (Exception e) {
+            if (throwablClass.equals(e.getClass())) {
                 return;
             }
+            Throwable cause = e.getCause();
+            do {
 
-            Throwable cause = null;
-            do
-            {
-                 cause = e.getCause();
+                if (cause == null) {
+                    break;
+                }
 
-                 if(cause.getClass().equals(throwablClass))
-                 {
-                     return;
-                 }
+                if (cause.getClass().equals(throwablClass)) {
+                    return;
+                }
+                cause = cause.getCause();
             }
             while (cause != null);
-
             throw e;
         }
 
+        throw new RuntimeException("Exception " + throwablClass.getSimpleName() + "has not been thrown!");
     }
 }

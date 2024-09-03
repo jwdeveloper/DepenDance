@@ -35,7 +35,7 @@ public class ContainerTests extends ContainerTestBase {
     @Test
     public void shouldRegisterWithType() {
         //Arrange
-        var container = builder
+        var container =  builder()
                 .registerSingleton(ExampleClass.class)
                 .registerTransient(ExampleClassV2.class)
                 .build();
@@ -48,7 +48,7 @@ public class ContainerTests extends ContainerTestBase {
 
     @Test
     public void shouldRegisterWithTypeAndImplementation() {
-        var container = builder
+        var container =  builder()
                 .registerSingleton(ExampleInterface.class, ExampleClass.class)
                 .registerTransient(ExampleInterfaceV2.class, ExampleClassV2.class)
                 .build();
@@ -62,7 +62,7 @@ public class ContainerTests extends ContainerTestBase {
     @Test
     public void shouldRegisterWithInstance() {
         var instance = new ExampleClass();
-        var container = builder
+        var container =  builder()
                 .registerSingleton(ExampleClass.class, instance)
                 .build();
         shouldBeNotNull(container, ExampleClass.class);
@@ -74,7 +74,7 @@ public class ContainerTests extends ContainerTestBase {
     public void shouldRegisterWithProvider() {
 
         var instance = new ExampleClass();
-        var container = builder
+        var container = builder()
                 .registerSingleton(ExampleClass.class, (e) -> instance)
                 .registerTransient(ExampleClassV2.class, (e) -> new ExampleClassV2())
                 .build();
@@ -88,7 +88,7 @@ public class ContainerTests extends ContainerTestBase {
     @Test
     public void shouldRegisterSingletonWithList() {
 
-        var container = builder
+        var container = builder()
                 .registerSingleton(ExampleCommonInterface.class, ExampleClass.class)
                 .registerTransient(ExampleCommonInterface.class, ExampleClassV2.class)
                 .registerTransient(ExampleCommonInterface.class, ExampleClassV3.class)
@@ -107,7 +107,7 @@ public class ContainerTests extends ContainerTestBase {
     @Test
     public void shouldRegisterTransientWithList() {
 
-        var container = builder
+        var container = builder()
                 .registerSingleton(ExampleCommonInterface.class, ExampleClass.class)
                 .registerTransient(ExampleCommonInterface.class, ExampleClassV2.class)
 
@@ -124,7 +124,7 @@ public class ContainerTests extends ContainerTestBase {
 
     @Test
     public void shouldPassListToObjectConstructor() {
-        var container = builder
+        var container = builder()
                 .registerTransient(ExampleCommonInterface.class, ExampleClass.class)
                 .registerTransient(ExampleCommonInterface.class, ExampleClassV2.class)
                 .registerTransientList(ExampleCommonInterface.class)
@@ -137,7 +137,7 @@ public class ContainerTests extends ContainerTestBase {
 
     @Test
     public void shouldRegister2DifferentLists() {
-        var container = builder
+        var container = builder()
                 .registerSingleton(ExampleInterface.class, new ExampleClass())
                 .registerSingleton(ExampleInterface.class, new ExampleClass())
                 .registerSingleton(ExampleInterface.class, new ExampleClass())
@@ -155,7 +155,7 @@ public class ContainerTests extends ContainerTestBase {
 
     @Test
     public void shouldHandleCaseWhenGenericTypeIsSame() {
-        var container = builder
+        var container = builder()
                 .registerSingleton(ExampleInterface.class, new ExampleClass())
                 .build();
 

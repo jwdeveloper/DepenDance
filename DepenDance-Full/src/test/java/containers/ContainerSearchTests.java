@@ -33,7 +33,7 @@ public class ContainerSearchTests extends ContainerTestBase {
     @Test
     public void ShouldFindByClassesCommonInterface()  {
         //Arrange
-        var container = builder
+        var container = builder()
                 .registerSingleton(ExampleCommonInterface.class, ExampleClass.class)
                 .registerSingleton(ExampleCommonInterface.class, ExampleClassV2.class)
                 .registerSingleton(ExampleCommonInterface.class, ExampleClassV3.class)
@@ -52,7 +52,7 @@ public class ContainerSearchTests extends ContainerTestBase {
     @Test
     public void shouldFindBySuperInterface()  {
         //Arrange
-        var container = builder
+        var container =  builder()
                 .registerSingleton(ExampleCommonInterface.class, ExampleClass.class)
                 .registerSingleton(ExampleCommonInterface.class, ExampleClassV2.class)
                 .registerSingleton(ExampleCommonInterface.class, ExampleClassV3.class)
@@ -72,7 +72,7 @@ public class ContainerSearchTests extends ContainerTestBase {
     @Test
     public void shouldFindBySuperInterfaceWithObjectInstance()  {
         //Arrange
-        var container = builder
+        var container =  builder()
                 .registerSingleton(ExampleInterface.class, new ExampleClass())
                 .registerSingleton(ExampleInterface.class, new ExampleClassV2())
                 .registerSingleton(ExampleInterface.class, new ExampleClassV3())
@@ -92,7 +92,7 @@ public class ContainerSearchTests extends ContainerTestBase {
     @Test
     public void ShouldFindBySuperClass()  {
         //Arrange
-        var container = builder
+        var container =  builder()
                 .registerSingleton(ExampleClass.class)
                 .registerSingleton(ExampleClassV2.class)
                 .build();
@@ -109,7 +109,7 @@ public class ContainerSearchTests extends ContainerTestBase {
     @Test
     public void ShouldFindBySuperSuperClass()  {
         //Arrange
-        var container = builder
+        var container =  builder()
                 .registerSingleton(ExampleClass.class)
                 .registerSingleton(ExampleClassV2.class)
                 .build();
@@ -127,7 +127,7 @@ public class ContainerSearchTests extends ContainerTestBase {
     @Test
     public void ShouldFindByAnnotation()  {
         //Arrange
-        var container = builder
+        var container =  builder()
                 .registerSingleton(ExampleClass.class)
                 .registerSingleton(ExampleClassV2.class)
                 .build();
