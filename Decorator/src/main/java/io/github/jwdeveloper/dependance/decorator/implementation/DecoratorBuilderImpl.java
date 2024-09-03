@@ -23,10 +23,9 @@
 package io.github.jwdeveloper.dependance.decorator.implementation;
 
 
-
 import io.github.jwdeveloper.dependance.decorator.api.Decorator;
 import io.github.jwdeveloper.dependance.decorator.api.builder.DecoratorBuilder;
-import io.github.jwdeveloper.dependance.decorator.api.models.DecorationDto;
+import io.github.jwdeveloper.dependance.decorator.api.models.ProxyData;
 import io.github.jwdeveloper.dependance.injector.api.enums.LifeTime;
 import io.github.jwdeveloper.dependance.injector.api.enums.RegistrationType;
 import io.github.jwdeveloper.dependance.injector.api.factory.InjectionInfoFactory;
@@ -40,60 +39,42 @@ import java.util.Map;
 
 public class DecoratorBuilderImpl implements DecoratorBuilder {
 
-    private final Map<Class<?>, List<Class<?>>> registeredTypes;
-    private final InjectionInfoFactory injectionInfoFactory;
+    private final Map<Class<?>, List<RegistrationInfo>> registeredTypes;
 
-    public DecoratorBuilderImpl(InjectionInfoFactory injectionInfoFactory,  Map<Class<?>, List<Class<?>>> decorators)
-    {
-        this.injectionInfoFactory = injectionInfoFactory;
-        this.registeredTypes = decorators;
+    public DecoratorBuilderImpl() {
+        this.registeredTypes = new HashMap<>();
     }
 
     @Override
-    public <T> DecoratorBuilder decorate(Class<T> _interface, Class<? extends T> implementation)
-    {
-        if(!registeredTypes.containsKey(_interface))
-        {
-            registeredTypes.put(_interface,new ArrayList<>());
-        }
-        var implementations = registeredTypes.get(_interface);
-        implementations.add(implementation);
+    public <T> DecoratorBuilder registerProxy(Class<T> target, Class<? extends T> proxy) {
+        var registrations = registeredTypes.computeIfAbsent(target, aClass -> new ArrayList<>());
+        var registration = new RegistrationInfo(target,
+                proxy,
+                null,
+                LifeTime.SESSION,
+                RegistrationType.InterfaceAndIml);
+        registrations.add(registration);
         return this;
     }
 
     @Override
-    public Decorator build()  {
-
-        var instanceProvider = new DecoratorInstanceProviderImpl();
-        try
-        {
-            var decorators = createDecoratorDto();
-            return new DefaultDecorator(instanceProvider, decorators);
-        }
-        catch (Exception e)
-        {
-            throw new RuntimeException("Unable to build decorator",e);
+    public Decorator build() {
+        try {
+            var proxies = createProxies();
+            return new DefaultDecorator(proxies);
+        } catch (Exception e) {
+            throw new RuntimeException("Unable to build decorator", e);
         }
     }
 
-    private Map<Class<?>, DecorationDto> createDecoratorDto() throws Exception {
-        var decorators = new HashMap<Class<?>, DecorationDto>();
-        for(var pair : registeredTypes.entrySet())
-        {
-            var injectionsInfoList = new ArrayList<InjectionInfo>();
-            for(var implementation : pair.getValue())
-            {
-                var registrationInfo = new RegistrationInfo(
-                        pair.getKey(),
-                        implementation,
-                        null,
-                        LifeTime.SINGLETON,
-                        RegistrationType.InterfaceAndIml);
-                var pari = injectionInfoFactory.create(registrationInfo);
-                injectionsInfoList.add(pari.getValue());
-            }
-            var decorationDto = new DecorationDto(pair.getKey(), injectionsInfoList);
-            decorators.put(pair.getKey(), decorationDto);
+    private Map<Class<?>, ProxyData> createProxies() {
+        var decorators = new HashMap<Class<?>, ProxyData>();
+        for (var registration : registeredTypes.entrySet()) {
+            var targetType = registration.getKey();
+            var targetValues = registration.getValue();
+
+            var decorationDto = new ProxyData(targetType, targetValues);
+            decorators.put(targetType, decorationDto);
         }
         return decorators;
     }

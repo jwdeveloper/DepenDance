@@ -38,7 +38,9 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder extends ContainerBuilder<Config, Builder>> implements ContainerBuilder<Config, Builder> {
+public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder extends ContainerBuilder<Config, Builder>>
+        implements ContainerBuilder<Config, Builder>
+{
     protected final ContainerConfigurationImpl config;
     protected final Logger logger;
 
@@ -70,15 +72,15 @@ public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder
     }
 
 
-    public Builder register(Class<?> implementation, LifeTime lifeTime) {
+    public Builder register(Class<?> type, LifeTime lifeTime) {
         config.addRegistration(new RegistrationInfo(
                 null,
-                implementation,
+                type,
                 null,
                 lifeTime,
                 RegistrationType.OnlyImpl
         ));
-        addRegisteredType(implementation);
+        addRegisteredType(type);
         return builder();
     }
 
@@ -96,10 +98,10 @@ public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder
 
 
     @Override
-    public <T> Builder registerList(Class<T> _interface, LifeTime lifeTime, Function<Container, Object> provider) {
+    public <T> Builder registerList(Class<T> type, LifeTime lifeTime, Function<Container, Object> provider) {
         config.addRegistration(new RegistrationInfo(
                 List.class,
-                _interface,
+                type,
                 provider,
                 lifeTime,
                 RegistrationType.List
@@ -108,10 +110,10 @@ public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder
     }
 
     @Override
-    public <T> Builder registerSingletonList(Class<T> _interface,  Function<Container, Object> provider) {
+    public <T> Builder registerSingletonList(Class<T> type, Function<Container, Object> provider) {
         config.addRegistration(new RegistrationInfo(
                 List.class,
-                _interface,
+                type,
                 provider,
                 LifeTime.SINGLETON,
                 RegistrationType.List
@@ -120,10 +122,10 @@ public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder
     }
 
     @Override
-    public <T> Builder registerTransientList(Class<T> _interface,  Function<Container, Object> provider) {
+    public <T> Builder registerTransientList(Class<T> type, Function<Container, Object> provider) {
         config.addRegistration(new RegistrationInfo(
                 List.class,
-                _interface,
+                type,
                 provider,
                 LifeTime.TRANSIENT,
                 RegistrationType.List
@@ -132,31 +134,31 @@ public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder
     }
 
     @Override
-    public Builder registerSingletonList(Class<?> genericType) {
-        return registerList(genericType, LifeTime.SINGLETON);
+    public Builder registerSingletonList(Class<?> type) {
+        return registerList(type, LifeTime.SINGLETON);
     }
 
     @Override
-    public Builder registerTransientList(Class<?> genericType) {
-        return registerList(genericType, LifeTime.TRANSIENT);
+    public Builder registerTransientList(Class<?> type) {
+        return registerList(type, LifeTime.TRANSIENT);
     }
 
     @Override
-    public <T> Builder registerList(Class<T> genericType, LifeTime lifeTime) {
-        return registerList(genericType, lifeTime, null);
+    public <T> Builder registerList(Class<T> type, LifeTime lifeTime) {
+        return registerList(type, lifeTime, null);
     }
 
 
     @Override
-    public <T> Builder register(Class<T> _interface, LifeTime lifeTime, Function<Container, Object> provider) {
+    public <T> Builder register(Class<T> type, LifeTime lifeTime, Function<Container, Object> provider) {
         config.addRegistration(new RegistrationInfo(
-                _interface,
+                type,
                 null,
                 provider,
                 lifeTime,
                 RegistrationType.InterfaceAndProvider
         ));
-        addRegisteredType(_interface);
+        addRegisteredType(type);
         return builder();
     }
 
@@ -171,26 +173,26 @@ public class ContainerBuilderImpl<Config extends ContainerConfiguration, Builder
         return register(_interface, implementation, LifeTime.TRANSIENT);
     }
 
-    public Builder registerSingleton(Class<?> implementation) {
-        return register(implementation, LifeTime.SINGLETON);
+    public Builder registerSingleton(Class<?> type) {
+        return register(type, LifeTime.SINGLETON);
     }
 
-    public Builder registerTransient(Class<?> implementation) {
-        return register(implementation, LifeTime.TRANSIENT);
+    public Builder registerTransient(Class<?> type) {
+        return register(type, LifeTime.TRANSIENT);
     }
 
-    public Builder registerSingleton(Class<?> _interface, Object instance) {
-        return register(_interface, LifeTime.SINGLETON, (x) -> instance);
-    }
-
-    @Override
-    public Builder registerSingleton(Class<?> _interface, Function<Container, Object> provider) {
-        return register(_interface, LifeTime.SINGLETON, provider);
+    public Builder registerSingleton(Class<?> type, Object instance) {
+        return register(type, LifeTime.SINGLETON, (x) -> instance);
     }
 
     @Override
-    public Builder registerTransient(Class<?> _interface, Function<Container, Object> provider) {
-        return register(_interface, LifeTime.TRANSIENT, provider);
+    public Builder registerSingleton(Class<?> type, Function<Container, Object> provider) {
+        return register(type, LifeTime.SINGLETON, provider);
+    }
+
+    @Override
+    public Builder registerTransient(Class<?> type, Function<Container, Object> provider) {
+        return register(type, LifeTime.TRANSIENT, provider);
     }
 
     private Builder builder() {

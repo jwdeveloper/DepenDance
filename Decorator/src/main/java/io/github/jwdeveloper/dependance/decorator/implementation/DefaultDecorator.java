@@ -24,22 +24,33 @@ package io.github.jwdeveloper.dependance.decorator.implementation;
 
 import io.github.jwdeveloper.dependance.decorator.api.Decorator;
 import io.github.jwdeveloper.dependance.decorator.api.DecoratorInstanceProvider;
-import io.github.jwdeveloper.dependance.decorator.api.models.DecorationDto;
+import io.github.jwdeveloper.dependance.decorator.api.models.ProxyData;
+import io.github.jwdeveloper.dependance.injector.api.containers.Container;
 import io.github.jwdeveloper.dependance.injector.api.events.events.OnInjectionEvent;
 import io.github.jwdeveloper.dependance.injector.api.events.events.OnRegistrationEvent;
+import io.github.jwdeveloper.dependance.injector.api.models.RegistrationInfo;
 
 
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.HashMap;
 import java.util.Map;
 
-public class DefaultDecorator implements Decorator
-{
-    private final Map<Class<?>, DecorationDto> decorators;
-    private final DecoratorInstanceProvider decoratorInstanceProvider;
+public class DefaultDecorator implements Decorator {
+    private final Map<Class<?>, ProxyData> targetToProxiesMap;
+    private final Map<Class<?>, RegistrationInfo> proxyToTargetMap;
 
-    public DefaultDecorator(DecoratorInstanceProvider decoratorInstanceProvider,
-                            Map<Class<?>, DecorationDto> decorators) {
-        this.decorators = decorators;
-        this.decoratorInstanceProvider = decoratorInstanceProvider;
+    public DefaultDecorator(Map<Class<?>, ProxyData> decorators) {
+        this.targetToProxiesMap = decorators;
+        this.proxyToTargetMap = new HashMap<>();
+
+        for (var value : decorators.values()) {
+            for (var proxy : value.proxies()) {
+                proxyToTargetMap.put(proxy.implementation(), proxy);
+            }
+        }
+
     }
 
     @Override
@@ -47,23 +58,64 @@ public class DefaultDecorator implements Decorator
         return true;
     }
 
-    public Object OnInjection(OnInjectionEvent event){
-        var decoratorDto =  decorators.get(event.input());
-        if(decoratorDto == null)
-        {
-            return event.output();
-        }
-        var result = event.output();
-        for(var injectionInfo : decoratorDto.implementations())
-        {
+    public Object OnInjection(OnInjectionEvent event) {
+        var output = event.output();
 
-            var nextDecorator = decoratorInstanceProvider.getInstance(
-                    injectionInfo,
-                    event.injectionInfoMap(),
-                    result,
-                    event.container());
-            result = nextDecorator;
+        var target = event.input();
+        if (proxyToTargetMap.containsKey(event.input())) {
+            var proxy = proxyToTargetMap.get(event.input());
+            target = proxy._interface();
+            return event.container().find(target);
         }
-        return result;
+
+        var proxyData = targetToProxiesMap.get(event.input());
+        if (proxyData == null) {
+            return output;
+        }
+        if (output == null) {
+            return null;
+        }
+
+
+        for (var proxy : proxyData.proxies()) {
+            output = createProxyInstance(output, proxy, event.container());
+        }
+        return output;
+    }
+
+
+    private Object createProxyInstance(Object target, RegistrationInfo injectionInfo, Container container) {
+        var classLoader = this.getClass().getClassLoader();
+        var targetType = injectionInfo._interface();
+        var proxyType = injectionInfo.implementation();
+        var proxyObject = Proxy.newProxyInstance(
+                classLoader,
+                new Class<?>[]{proxyType},
+                (inputInstance, method, arguments) ->
+                {
+                    if (method.isDefault()) {
+                        return InvocationHandler.invokeDefault(inputInstance, method, arguments);
+                    }
+
+                    Method targetTypeMethod = null;
+                    try {
+                        targetTypeMethod = targetType.getMethod(method.getName(), method.getParameterTypes());
+                    } catch (NoSuchMethodException e) {
+                        //pass
+                    }
+
+                    if (!targetTypeMethod.getReturnType().equals(method.getReturnType())) {
+                        var result = targetTypeMethod.invoke(target, arguments);
+                        var info = new RegistrationInfo(result.getClass(), method.getReturnType(), null, null, null);
+                        return createProxyInstance(result, info, container);
+                    }
+
+                    if (targetTypeMethod != null) {
+                        return targetTypeMethod.invoke(target, arguments);
+                    }
+
+                    throw new UnsupportedOperationException("Method not supported: " + method.getName());
+                });
+        return proxyObject;
     }
 }

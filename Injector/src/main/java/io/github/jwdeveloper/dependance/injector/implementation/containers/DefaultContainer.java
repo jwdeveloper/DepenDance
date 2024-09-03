@@ -22,11 +22,11 @@ import java.util.logging.Logger;
 
 
 public class DefaultContainer implements Container, Registrable {
-    protected final EventHandler eventHandler;
-    protected final InstanceProvider instaneProvider;
     protected final Logger logger;
-    protected final Map<Class<?>, List<InjectionInfo>> injections;
+    protected final EventHandler eventHandler;
+    protected final InstanceProvider instanceProvider;
     protected final InjectionInfoFactory injectionInfoFactory;
+    protected final Map<Class<?>, List<InjectionInfo>> injections;
 
     public DefaultContainer(
             InstanceProvider instanceProvider,
@@ -34,7 +34,7 @@ public class DefaultContainer implements Container, Registrable {
             Logger logger,
             InjectionInfoFactory injectionInfoFactory,
             List<RegistrationInfo> registrationInfos) {
-        this.instaneProvider = instanceProvider;
+        this.instanceProvider = instanceProvider;
         this.eventHandler = eventHandler;
         this.logger = logger;
         this.injectionInfoFactory = injectionInfoFactory;
@@ -46,6 +46,10 @@ public class DefaultContainer implements Container, Registrable {
         for (var registration : registrationInfos) {
             register(registration);
         }
+    }
+
+    public Map<Class<?>, List<InjectionInfo>> injections() {
+        return injections;
     }
 
 
@@ -127,7 +131,7 @@ public class DefaultContainer implements Container, Registrable {
     private Object find(InjectionInfo injectionInfo, Type... genericParameters) {
         var injectionType = injectionInfo.getInjectionKeyType();
         try {
-            var instance = instaneProvider.getInstance(injectionInfo, this);
+            var instance = instanceProvider.getInstance(injectionInfo, this);
             var onInjectionEvent = new OnInjectionEvent(
                     injectionType,
                     genericParameters,

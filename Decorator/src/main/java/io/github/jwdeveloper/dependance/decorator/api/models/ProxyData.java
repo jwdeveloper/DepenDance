@@ -22,10 +22,11 @@
  */
 package io.github.jwdeveloper.dependance.decorator.api.models;
 import io.github.jwdeveloper.dependance.injector.api.models.InjectionInfo;
+import io.github.jwdeveloper.dependance.injector.api.models.RegistrationInfo;
 
 import java.util.List;
 
-public record DecorationDto(Class<?> _interface, List<InjectionInfo> implementations)
+public record ProxyData(Class<?> target, List<RegistrationInfo> proxies)
 {
 
 }

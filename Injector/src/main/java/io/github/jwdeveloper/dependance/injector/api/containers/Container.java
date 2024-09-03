@@ -28,9 +28,14 @@ import io.github.jwdeveloper.dependance.injector.api.search.ContainerSearch;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
-public interface Container extends Cloneable, ContainerSearch
-{
+public interface Container extends Cloneable, ContainerSearch {
+    /**
+     * Look for the object inside the container by the type
+     * When object is not found it throws Exception
+     *
+     * @param type              the search type
+     * @param genericParameters the generics parameters of the search type, they could be empty
+     * @return the instance of found type object
+     */
     Object find(Class<?> type, Type... genericParameters);
-
-
 }

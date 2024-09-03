@@ -26,11 +26,18 @@ import io.github.jwdeveloper.dependance.Dependance;
 import io.github.jwdeveloper.dependance.api.DependanceContainer;
 import io.github.jwdeveloper.dependance.api.DependanceContainerConfiguration;
 import io.github.jwdeveloper.dependance.api.JarScanner;
+import io.github.jwdeveloper.dependance.api.events.AutoScanEvent;
 import io.github.jwdeveloper.dependance.decorator.api.builder.DecoratorBuilder;
 import io.github.jwdeveloper.dependance.decorator.implementation.DecoratorBuilderImpl;
 import io.github.jwdeveloper.dependance.implementation.common.JarScannerImpl;
 import io.github.jwdeveloper.dependance.implementation.common.JarScannerOptions;
 import io.github.jwdeveloper.dependance.implementation.common.ScannerEvent;
+import io.github.jwdeveloper.dependance.injector.api.containers.Container;
+import io.github.jwdeveloper.dependance.injector.api.containers.ContainerConfiguration;
+import io.github.jwdeveloper.dependance.injector.api.enums.LifeTime;
+import io.github.jwdeveloper.dependance.injector.api.events.ContainerEvents;
+import io.github.jwdeveloper.dependance.injector.api.events.events.OnInjectionEvent;
+import io.github.jwdeveloper.dependance.injector.api.events.events.OnRegistrationEvent;
 import io.github.jwdeveloper.dependance.injector.implementation.containers.builder.ContainerBuilderImpl;
 import io.github.jwdeveloper.dependance.injector.implementation.factory.InjectionInfoFactoryImpl;
 import lombok.Getter;
@@ -39,9 +46,10 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.logging.Logger;
 
-public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceContainerConfiguration, DependanceContainerBuilder> {
+public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceContainerConfiguration, DependanceContainerBuilder> implements ContainerConfiguration {
 
     private final DecoratorBuilder decoratorBuilder;
     private final JarScannerOptions options;
@@ -53,15 +61,67 @@ public class DependanceContainerBuilder extends ContainerBuilderImpl<DependanceC
 
     public DependanceContainerBuilder() {
         super();
-        this.decoratorBuilder = new DecoratorBuilderImpl(new InjectionInfoFactoryImpl(), new HashMap<>());
+        this.decoratorBuilder = new DecoratorBuilderImpl();
         this.options = new JarScannerOptions();
         dependanceContainerConfiguration = new DependanceContainerConfigurationImpl(this.getConfiguration());
     }
 
-    public <T> DependanceContainerBuilder registerDecorator(Class<T> _interface, Class<? extends T> implementation) {
-        decoratorBuilder.decorate(_interface, implementation);
+
+    /**
+     * When some type is not present in the current container
+     * then it try to find it in to another container
+     *
+     * @param another the another container that will be linked with current container
+     * @return the builder.
+     */
+    public DependanceContainerBuilder linkContainer(Container another) {
+        onInjection(onInjectionEvent ->
+        {
+            if (onInjectionEvent.hasOutput()) {
+                return onInjectionEvent.output();
+            }
+            return another.find(onInjectionEvent.input(), onInjectionEvent.inputGenericParameters());
+        });
         return this;
     }
+
+    public void onInjection(Function<OnInjectionEvent, Object> action) {
+        configure(configuration ->
+        {
+            configuration.onInjection(action);
+        });
+    }
+
+    @Override
+    public void onRegistration(Function<OnRegistrationEvent, Boolean> event) {
+        configure(configuration ->
+        {
+            configuration.onRegistration(event);
+        });
+    }
+
+    @Override
+    public void onEvent(ContainerEvents event) {
+        configure(configuration ->
+        {
+            configuration.onEvent(event);
+        });
+    }
+
+
+    public DependanceContainerBuilder onScan(Function<AutoScanEvent, Boolean> action) {
+        configure(configuration ->
+        {
+            configuration.onAutoScan(action);
+        });
+        return this;
+    }
+
+    public <T> DependanceContainerBuilder registerProxy(Class<T> target, Class<? extends T> proxyType) {
+        decoratorBuilder.registerProxy(target, proxyType);
+        return this;
+    }
+
 
     @Override
     public DependanceContainerBuilder configure(Consumer<DependanceContainerConfiguration> consumer) {

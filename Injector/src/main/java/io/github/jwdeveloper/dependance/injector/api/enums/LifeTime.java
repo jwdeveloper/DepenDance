@@ -22,7 +22,26 @@
  */
 package io.github.jwdeveloper.dependance.injector.api.enums;
 
-public enum LifeTime
-{
-    SINGLETON, TRANSIENT
+/**
+ * LifeTime specify how does object will be
+ * obtained from the container
+ */
+public enum LifeTime {
+
+    /**
+     * Singleton creates only one instance of given type in
+     * the container.
+     */
+    SINGLETON,
+    /**
+     * Everytime type is requested from the container new instance of
+     * given type is created
+     */
+    TRANSIENT,
+    /**
+     * Creates one instance of type per one session. There could be
+     * many sessions created from certain container and each session
+     * will have only unique instance of Session type
+     */
+    SESSION
 }

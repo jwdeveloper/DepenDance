@@ -45,7 +45,7 @@ public interface DependanceContainer extends Container {
      * @param parametersTypes an array of Type objects representing the types of the parameters to be resolved
      * @return an array of object instances corresponding to the specified parameter types
      */
-    Object[] resolveParameters(Type[] parametersTypes);
+    Object[] resolveParameters(Type... parametersTypes);
 
     /**
      * Resolves and returns the parameters required for the given method or constructor.
@@ -54,6 +54,16 @@ public interface DependanceContainer extends Container {
      * @return an array of object instances representing the resolved parameters for the specified method or constructor
      */
     Object[] resolveParameters(Executable method);
+
+
+    /**
+     * Create object instance based on the provided parameters and the types inside the container
+     *
+     * @param type output object type
+     * @param args input object parameter
+     * @return object instance
+     */
+    Object resolveObject(Class<?> type, Object... args);
 
     /**
      * Creates a builder for a sub-container that will be a child of this container.

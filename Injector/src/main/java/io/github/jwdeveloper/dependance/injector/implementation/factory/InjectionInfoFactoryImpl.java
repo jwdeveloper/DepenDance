@@ -58,10 +58,10 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         if (Modifier.isInterface(impl.getModifiers())) {
             throw new ContainerException("Implementation must be class, not Interface");
         }
-        return PrepareInjectionInfo(impl, impl, info);
+        return prepareInjectionInfo(impl, impl, info);
     }
 
-    private Pair<Class<?>, InjectionInfo> InterfaceAndImlStrategy(RegistrationInfo info) throws Exception {
+    private Pair<Class<?>, InjectionInfo> InterfaceAndImlStrategy(RegistrationInfo info)  {
         var impl = info.implementation();
         var _interface = info._interface();
         if (Modifier.isAbstract(impl.getModifiers())) {
@@ -70,11 +70,11 @@ public class InjectionInfoFactoryImpl implements InjectionInfoFactory {
         if (Modifier.isInterface(impl.getModifiers())) {
             throw new ContainerException("Implementation must be class, not Interface");
         }
-        return PrepareInjectionInfo(impl, _interface, info);
+        return prepareInjectionInfo(impl, _interface, info);
     }
 
 
-    private Pair<Class<?>, InjectionInfo> PrepareInjectionInfo(Class<?> impl, Class<?> _interface, RegistrationInfo info) {
+    public Pair<Class<?>, InjectionInfo> prepareInjectionInfo(Class<?> impl, Class<?> _interface, RegistrationInfo info) {
         var result = new InjectionInfo();
         var constructor = getConstructor(impl);
         throwIfCycleDependency(constructor, impl, impl);
