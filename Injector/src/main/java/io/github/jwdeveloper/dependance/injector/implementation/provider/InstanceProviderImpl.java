@@ -29,6 +29,8 @@ import io.github.jwdeveloper.dependance.injector.api.models.InjectionInfo;
 import io.github.jwdeveloper.dependance.injector.api.provider.InstanceProvider;
 
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -43,22 +45,24 @@ public class InstanceProviderImpl implements InstanceProvider {
         Object result = null;
         InjectionInfo handler = null;
         Class<?> parameterClass = null;
+        Object source;
         if (info.hasInjectedConstructor()) {
             var i = 0;
             for (var parameterType : info.getInjectedConstructorTypes()) {
                 parameterClass = parameterType;
-
+                source = info.getInjectedConstructor().getParameters()[i];
                 Type genericType = info.getInjectedConstructor().getGenericParameterTypes()[i];
                 if (genericType instanceof ParameterizedType parameterizedType) {
-                    info.getConstructorPayLoadTemp()[i] = container.find(parameterClass, parameterizedType.getActualTypeArguments());
+                    info.getConstructorPayLoadTemp()[i] = container.find(parameterClass, source, parameterizedType.getActualTypeArguments());
                 } else {
-                    info.getConstructorPayLoadTemp()[i] = container.find(parameterClass, genericType);
+                    info.getConstructorPayLoadTemp()[i] = container.find(parameterClass, source, genericType);
                 }
                 i++;
             }
             result = info.getInjectedConstructor().newInstance(info.getConstructorPayLoadTemp());
             for (var injectedField : info.getInjectedFields()) {
-                var fieldValue = container.find(injectedField.getType(), injectedField.getGenericType());
+                source = injectedField;
+                var fieldValue = container.find(injectedField.getType(), source, injectedField.getGenericType());
                 injectedField.set(result, fieldValue);
             }
             info.setInstance(result);

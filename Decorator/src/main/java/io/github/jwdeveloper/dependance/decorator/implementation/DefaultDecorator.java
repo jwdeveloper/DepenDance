@@ -23,7 +23,7 @@
 package io.github.jwdeveloper.dependance.decorator.implementation;
 
 import io.github.jwdeveloper.dependance.decorator.api.Decorator;
-import io.github.jwdeveloper.dependance.decorator.api.DecoratorInstanceProvider;
+import io.github.jwdeveloper.dependance.decorator.api.annotations.ProxyProvider;
 import io.github.jwdeveloper.dependance.decorator.api.models.ProxyData;
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
 import io.github.jwdeveloper.dependance.injector.api.events.events.OnInjectionEvent;
@@ -60,12 +60,11 @@ public class DefaultDecorator implements Decorator {
 
     public Object OnInjection(OnInjectionEvent event) {
         var output = event.output();
-
         var target = event.input();
         if (proxyToTargetMap.containsKey(event.input())) {
             var proxy = proxyToTargetMap.get(event.input());
             target = proxy._interface();
-            return event.container().find(target);
+            return event.container().find(target, event.source());
         }
 
         var proxyData = targetToProxiesMap.get(event.input());
@@ -78,11 +77,30 @@ public class DefaultDecorator implements Decorator {
 
 
         for (var proxy : proxyData.proxies()) {
-            output = createProxyInstance(output, proxy, event.container());
+            var targetObject = output;
+            output = createProxyInstance(targetObject, proxy, event.container());
+            setProxyFieldObject(targetObject, output);
         }
         return output;
     }
 
+
+    private void setProxyFieldObject(Object target, Object proxy) {
+        if (target.getClass().isInterface()) {
+            return;
+        }
+        for (var field : target.getClass().getDeclaredFields()) {
+            if (!field.isAnnotationPresent(ProxyProvider.class)) {
+                continue;
+            }
+            field.setAccessible(true);
+            try {
+                field.set(target, proxy);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
 
     private Object createProxyInstance(Object target, RegistrationInfo injectionInfo, Container container) {
         var classLoader = this.getClass().getClassLoader();

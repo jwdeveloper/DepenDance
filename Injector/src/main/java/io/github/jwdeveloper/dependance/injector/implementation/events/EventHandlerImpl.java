@@ -58,7 +58,8 @@ public class EventHandlerImpl implements EventHandler {
                     event.injectionInfo(),
                     output,
                     event.injectionInfoMap(),
-                    event.container()));
+                    event.container(),
+                    event.source()));
         }
         return output;
     }

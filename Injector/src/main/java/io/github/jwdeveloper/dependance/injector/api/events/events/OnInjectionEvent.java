@@ -34,7 +34,8 @@ public record OnInjectionEvent(Class<?> input,
                                InjectionInfo injectionInfo,
                                Object output,
                                Map<Class<?>, List<InjectionInfo>> injectionInfoMap,
-                               Container container) {
+                               Container container,
+                               Object source) {
 
     public boolean hasGenericParameters() {
         return inputGenericParameters != null && this.inputGenericParameters.length != 0;

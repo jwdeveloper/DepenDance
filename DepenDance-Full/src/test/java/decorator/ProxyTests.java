@@ -26,7 +26,7 @@ import io.github.jwdeveloper.dependance.Dependance;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class DecoratorProxyTest {
+public class ProxyTests {
 
     public static class SpigotValidationServiceImpl implements SpigotValidationService {
 

@@ -108,6 +108,10 @@ public class DefaultContainer implements Container, Registrable {
     }
 
     public Object find(Class<?> _injection, Type... genericParameters) {
+        return find(_injection, null, genericParameters);
+    }
+
+    public Object find(Class<?> _injection, Object source, Type... genericParameters) {
         var injectionInfos = injections.get(_injection);
         if (injectionInfos == null) {
             var onInjectionEvent = new OnInjectionEvent(_injection,
@@ -115,7 +119,8 @@ public class DefaultContainer implements Container, Registrable {
                     null,
                     null,
                     injections,
-                    this);
+                    this,
+                    source);
             var result = eventHandler.OnInjection(onInjectionEvent);
             if (result == null) {
                 throw new InjectionNotFoundException(Messages.INJECTION_NOT_FOUND, _injection.getSimpleName());
@@ -140,17 +145,18 @@ public class DefaultContainer implements Container, Registrable {
                     null,
                     null,
                     injections,
-                    this);
+                    this,
+                    source);
             var result = eventHandler.OnInjection(onInjectionEvent);
             if (result != null) {
                 return result;
             }
             throw new InjectionNotFoundException(Messages.INJECTION_NOT_FOUND_GENERICS_TYPE, _injection.getSimpleName(), genericsType.getTypeName());
         }
-        return find(optional.get(), genericParameters);
+        return find(optional.get(), source, genericParameters);
     }
 
-    private Object find(InjectionInfo injectionInfo, Type... genericParameters) {
+    private Object find(InjectionInfo injectionInfo, Object source, Type... genericParameters) {
         var injectionType = injectionInfo.getInjectionKeyType();
         try {
             var instance = instanceProvider.getInstance(injectionInfo, this);
@@ -160,7 +166,8 @@ public class DefaultContainer implements Container, Registrable {
                     injectionInfo,
                     instance,
                     injections,
-                    this);
+                    this,
+                    source);
             return eventHandler.OnInjection(onInjectionEvent);
         } catch (Exception e) {
             throw new ContainerException(String.format(Messages.INJECTION_CANT_BE_CREATED, injectionType.getSimpleName()), e);

@@ -107,10 +107,16 @@ public class DepenDanceContainerImpl implements DependanceContainer {
     }
 
 
-
     @Override
     public Object find(Class<?> type, Type... genericParameters) {
+
         return container.find(type, genericParameters);
+    }
+
+    @Override
+    public Object find(Class<?> type, Object source, Type... genericParameters) {
+        return container.find(type, source, genericParameters);
+
     }
 
     @Override

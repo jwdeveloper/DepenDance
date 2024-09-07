@@ -38,4 +38,16 @@ public interface Container extends Cloneable, ContainerSearch {
      * @return the instance of found type object
      */
     Object find(Class<?> type, Type... genericParameters);
+
+
+    /**
+     * Search for the object inside the container by the type
+     * When object is not found it throws Exception
+     *
+     * @param type              the search type
+     * @param source            the member source, (Constructor parameter, Type field) that is currently being resolved
+     * @param genericParameters the generics parameters of the search type, they could be empty
+     * @return the instance of found type object
+     */
+    Object find(Class<?> type, Object source, Type... genericParameters);
 }
