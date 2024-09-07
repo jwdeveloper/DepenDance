@@ -63,7 +63,7 @@
     <dependency>
         <groupid>com.github.jwdeveloper.DepenDance</groupid>
         <artifactid>DepenDance-Full</artifactid>
-        <version>0.0.19-Release</version>
+        <version>0.0.20-Release</version>
     </dependency>     
 ```
 

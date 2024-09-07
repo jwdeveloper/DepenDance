@@ -7,7 +7,7 @@
     <groupId>io.github.jwdeveloper.dependance</groupId>
     <artifactId>DepenDance</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.19-Release</version>
+    <version>0.0.20-Release</version>
     <modules>
         <module>Injector</module>
         <module>Decorator</module>
