@@ -1,3 +1,25 @@
+/*
+ * Copyright (c) 2023-2023 jwdeveloper  <jacekwoln@gmail.com>
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining
+ * a copy of this software and associated documentation files (the
+ * "Software"), to deal in the Software without restriction, including
+ * without limitation the rights to use, copy, modify, merge, publish,
+ * distribute, sublicense, and/or sell copies of the Software, and to
+ * permit persons to whom the Software is furnished to do so, subject to
+ * the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be
+ * included in all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+ * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+ * OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION
+ * WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
 package io.github.jwdeveloper.dependance.injector.implementation.containers;
 
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
@@ -22,11 +44,11 @@ import java.util.logging.Logger;
 
 
 public class DefaultContainer implements Container, Registrable {
-    protected final EventHandler eventHandler;
-    protected final InstanceProvider instaneProvider;
     protected final Logger logger;
-    protected final Map<Class<?>, List<InjectionInfo>> injections;
+    protected final EventHandler eventHandler;
+    protected final InstanceProvider instanceProvider;
     protected final InjectionInfoFactory injectionInfoFactory;
+    protected final Map<Class<?>, List<InjectionInfo>> injections;
 
     public DefaultContainer(
             InstanceProvider instanceProvider,
@@ -34,7 +56,7 @@ public class DefaultContainer implements Container, Registrable {
             Logger logger,
             InjectionInfoFactory injectionInfoFactory,
             List<RegistrationInfo> registrationInfos) {
-        this.instaneProvider = instanceProvider;
+        this.instanceProvider = instanceProvider;
         this.eventHandler = eventHandler;
         this.logger = logger;
         this.injectionInfoFactory = injectionInfoFactory;
@@ -46,6 +68,10 @@ public class DefaultContainer implements Container, Registrable {
         for (var registration : registrationInfos) {
             register(registration);
         }
+    }
+
+    public Map<Class<?>, List<InjectionInfo>> injections() {
+        return injections;
     }
 
 
@@ -127,7 +153,7 @@ public class DefaultContainer implements Container, Registrable {
     private Object find(InjectionInfo injectionInfo, Type... genericParameters) {
         var injectionType = injectionInfo.getInjectionKeyType();
         try {
-            var instance = instaneProvider.getInstance(injectionInfo, this);
+            var instance = instanceProvider.getInstance(injectionInfo, this);
             var onInjectionEvent = new OnInjectionEvent(
                     injectionType,
                     genericParameters,

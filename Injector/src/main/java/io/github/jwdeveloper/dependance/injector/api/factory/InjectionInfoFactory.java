@@ -28,7 +28,24 @@ import io.github.jwdeveloper.dependance.injector.api.models.RegistrationInfo;
 import io.github.jwdeveloper.dependance.injector.api.util.Pair;
 
 
-public interface InjectionInfoFactory
-{
-     Pair<Class<?>, InjectionInfo> create(RegistrationInfo registrationInfo) throws Exception;
+public interface InjectionInfoFactory {
+
+    /**
+     * Creates and validates the injection info
+     *
+     * @param registrationInfo
+     * @return
+     * @throws Exception
+     */
+    Pair<Class<?>, InjectionInfo> create(RegistrationInfo registrationInfo) throws Exception;
+
+    /**
+     * Creates injection info without the validation
+     *
+     * @param impl
+     * @param _interface
+     * @param info
+     * @return
+     */
+    Pair<Class<?>, InjectionInfo> prepareInjectionInfo(Class<?> impl, Class<?> _interface, RegistrationInfo info);
 }

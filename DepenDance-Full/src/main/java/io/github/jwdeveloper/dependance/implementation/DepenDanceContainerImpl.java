@@ -25,11 +25,14 @@ package io.github.jwdeveloper.dependance.implementation;
 import io.github.jwdeveloper.dependance.Dependance;
 import io.github.jwdeveloper.dependance.api.DependanceContainer;
 import io.github.jwdeveloper.dependance.injector.api.containers.Container;
+import io.github.jwdeveloper.dependance.injector.api.enums.LifeTime;
+import io.github.jwdeveloper.dependance.injector.implementation.containers.DefaultContainer;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.stream.Collectors;
 
 public class DepenDanceContainerImpl implements DependanceContainer {
 
@@ -68,19 +71,42 @@ public class DepenDanceContainerImpl implements DependanceContainer {
     }
 
     @Override
-    public DependanceContainerBuilder createChildContainer() {
-        return Dependance.newContainer()
-                .configure(config ->
-                {
-                    config.onInjection(onInjectionEvent ->
-                    {
-                        if (onInjectionEvent.hasOutput()) {
-                            return onInjectionEvent.output();
-                        }
-                        return this.find(onInjectionEvent.input(), onInjectionEvent.inputGenericParameters());
-                    });
-                });
+    public Object resolveObject(Class<?> type, Object... args) {
+        return null;
     }
+
+
+    /**
+     * Creates sub container that is linked with the current container
+     *
+     * @return the sub-container builder
+     */
+    @Override
+    public DependanceContainerBuilder createChildContainer() {
+        return Dependance.newContainer().linkContainer(this);
+    }
+
+
+    public DependanceContainerBuilder createSession() {
+        var sessionContainer = createChildContainer();
+
+        if (container instanceof DefaultContainer defaultContainer) {
+            var injections = defaultContainer
+                    .injections()
+                    .values()
+                    .stream()
+                    .mapMulti((list, downstream) ->
+                            list.stream()
+                                    .filter(x -> x.getLifeTime().equals(LifeTime.SESSION))
+                                    .forEach(downstream)
+                    )
+                    .toList();
+
+        }
+        return sessionContainer;
+    }
+
+
 
     @Override
     public Object find(Class<?> type, Type... genericParameters) {

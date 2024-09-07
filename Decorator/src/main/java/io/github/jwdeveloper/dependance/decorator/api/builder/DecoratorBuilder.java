@@ -24,8 +24,23 @@ package io.github.jwdeveloper.dependance.decorator.api.builder;
 
 
 import io.github.jwdeveloper.dependance.decorator.api.Decorator;
+import io.github.jwdeveloper.dependance.injector.api.enums.LifeTime;
 
 public interface DecoratorBuilder {
-    <T> DecoratorBuilder decorate(Class<T> _interface, Class<? extends T> implementation);
-    Decorator build() ;
+    /**
+     * Register the proxy instance of the certain type
+     * let say we are making Cats game.
+     * There will be a Cat interface that represents the default cat
+     * However, we need to make WildCat interface that will have all the features of the Cat interface
+     * <p>
+     * to do so, you can use Cat interface as a target and WildCat as a proxy
+     *
+     * @param target   the target type
+     * @param proxy    the proxy type
+     * @param <T>      The type of the target
+     * @return the builder instance.
+     */
+    <T> DecoratorBuilder registerProxy(Class<T> target, Class<? extends T> proxy);
+
+    Decorator build();
 }

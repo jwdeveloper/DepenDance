@@ -7,7 +7,7 @@
     <groupId>io.github.jwdeveloper.dependance</groupId>
     <artifactId>DepenDance</artifactId>
     <packaging>pom</packaging>
-    <version>0.0.18-Release</version>
+    <version>0.0.19-Release</version>
     <modules>
         <module>Injector</module>
         <module>Decorator</module>
@@ -19,10 +19,14 @@
 
     <build>
         <plugins>
-            <plugin>
+           <!-- <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <version>3.3.0</version>
+                <configuration>
+                    <javadocExecutable>${java.home}/bin/javadoc</javadocExecutable>
+                    <excludePackageNames>io.github.jwdeveloper.dependance.implementation.**</excludePackageNames>
+                </configuration>
                 <executions>
                     <execution>
                         <id>attach-javadocs</id>
@@ -32,7 +36,7 @@
                         </goals>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
             <plugin>
                 <groupId>com.mycila</groupId>
                 <artifactId>license-maven-plugin</artifactId>

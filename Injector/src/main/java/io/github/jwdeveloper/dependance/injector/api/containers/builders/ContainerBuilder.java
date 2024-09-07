@@ -31,40 +31,178 @@ import io.github.jwdeveloper.dependance.injector.implementation.containers.Conta
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+
+/**
+ * Nomenclature
+ * <p>
+ * Request - obtaining instance of object from the container.
+ * For example if we want request the Cat class we do.
+ * ```
+ * Cat cat = container.find(Cat.class);
+ * ```
+ */
 public interface ContainerBuilder<Config extends ContainerConfiguration, Builder extends ContainerBuilder<Config, Builder>> {
 
+    /**
+     * Configure the container options, you can
+     * set there things such as container events
+     *
+     * @param configuration the lambda action
+     * @return the builder instance.
+     */
     Builder configure(Consumer<Config> configuration);
 
+
+    /**
+     * @param registrationInfo
+     * @return the builder instance
+     */
     Builder register(RegistrationInfo registrationInfo);
 
-    Builder register(Class<?> _class, LifeTime lifeTime);
+    /**
+     * Register given type into the container,
+     * the LifeType might be adjusted
+     *
+     * @param type     the registration type
+     * @param lifeTime the registration LifeTime
+     * @return the builder instance
+     * @see LifeTime
+     */
+    Builder register(Class<?> type, LifeTime lifeTime);
 
+    /**
+     * Register given interface and its implementation into the container.
+     * When the interface is requested, the instance of the returned object
+     * will be made from the type of the implementation.
+     *
+     * @param _interface     the interface
+     * @param implementation the implementation of given interface
+     * @param lifeTime       the type lifetime
+     * @param <T>            The Type of Interface
+     * @return the builder instance
+     */
     <T> Builder register(Class<T> _interface, Class<? extends T> implementation, LifeTime lifeTime);
 
-    <T> Builder register(Class<T> _interface, LifeTime lifeTime, Function<Container, Object> provider);
 
-    <T> Builder registerList(Class<T> _interface, LifeTime lifeTime);
-    Builder registerSingletonList(Class<?> _interface);
+    /**
+     * Register given interface and its provider into the container.
+     * When the interface is requested, the provider will be called
+     * and return the instance.
+     * <p>
+     * In case of LifeTime transient the provider will be called every request
+     *
+     * @param type     the registered type, can be Interface, Class, Record, Enum
+     * @param provider the lambda provider with Container as input and Object instance as output
+     * @param lifeTime the type lifetime
+     * @param <T>      The Type of Interface
+     * @return the builder instance
+     */
+    <T> Builder register(Class<T> type, LifeTime lifeTime, Function<Container, Object> provider);
 
-    Builder registerTransientList(Class<?> _interface);
 
-    <T> Builder registerList(Class<T> _interface, LifeTime lifeTime, Function<Container, Object> provider);
+    /**
+     * Registers a List of the given type to the container. List will
+     * be created by searching types in the container that are equal or assignable
+     * for the given type.
+     * <p>
+     * You must use it as List<T>, however Collection or other implementation of the list are
+     * not supported
+     *
+     * @param type     the type of the items that will be included to the List
+     * @param lifeTime the LifeTime
+     * @param <T>      The type of type
+     * @return the builder instance
+     */
+    <T> Builder registerList(Class<T> type, LifeTime lifeTime);
 
-    <T> Builder registerSingletonList(Class<T> _interface, Function<Container, Object> provider);
+    /**
+     * Registers a List of the given type to the container as singleton. List will
+     * be created by searching types in the container that are equal or assignable
+     * for the given type.
+     * <p>
+     * You must use it as List<T>, however Collection or other implementation of the list are
+     * not supported
+     *
+     * @param type the type of the items that will be included to the List
+     * @return the builder instance
+     */
+    Builder registerSingletonList(Class<?> type);
 
-    <T> Builder registerTransientList(Class<T> _interface, Function<Container, Object> provider);
+    /**
+     * Registers a List of the given type to the container as transient. List will
+     * be created by searching types in the container that are equal or assignable
+     * for the given type.
+     * <p>
+     * You must use it as List<T>, however Collection or other implementation of the list are
+     * not supported
+     *
+     * @param type the type of the items that will be included to the List
+     * @return the builder instance
+     */
+    Builder registerTransientList(Class<?> type);
 
-    Builder registerSingleton(Class<?> _class);
+    <T> Builder registerList(Class<T> type, LifeTime lifeTime, Function<Container, Object> provider);
 
-    Builder registerTransient(Class<?> _class);
+    <T> Builder registerSingletonList(Class<T> type, Function<Container, Object> provider);
 
+    <T> Builder registerTransientList(Class<T> type, Function<Container, Object> provider);
+
+    Builder registerSingleton(Class<?> type);
+
+    Builder registerTransient(Class<?> type);
+
+    /**
+     * Register given interface and its implementation into the container as singleton.
+     * If interface was not requested even once, the instance of the returned object
+     *
+     * @param _interface     the interface
+     * @param implementation the implementation of given interface
+     * @param <T>            The Type of Interface
+     * @return the builder instance
+     */
     <T> Builder registerSingleton(Class<T> _interface, Class<? extends T> implementation);
 
+    /**
+     * Register given interface and its implementation into the container as transient.
+     * Everytime the interface is requested, the instance of the returned object
+     *
+     * @param _interface     the interface
+     * @param implementation the implementation of given interface
+     * @param <T>            The Type of Interface
+     * @return the builder instance
+     */
     <T> Builder registerTransient(Class<T> _interface, Class<? extends T> implementation);
 
-    Builder registerSingleton(Class<?> _interface, Object instance);
 
-    Builder registerSingleton(Class<?> _interface, Function<Container, Object> provider);
+    /**
+     * Register given type and its instance into the container as singleton.
+     * Everytime interface is requested the instance is returned
+     *
+     * @param type     the type of instance
+     * @param instance the instance of the type
+     * @return the builder instance
+     */
+    Builder registerSingleton(Class<?> type, Object instance);
 
-    Builder registerTransient(Class<?> _interface, Function<Container, Object> provider);
+    /**
+     * Register given type and its lambda provider into the container as singleton.
+     * If interface was not requested even once, the provided is called and its provided
+     * object is returned
+     *
+     * @param type     the type of the returned object of provider
+     * @param provider the lambda provider with Container as input and Object instance as output
+     * @return the builder instance
+     */
+    Builder registerSingleton(Class<?> type, Function<Container, Object> provider);
+
+    /**
+     * Register given type and its lambda provider into the container as transient.
+     * Everytime the interface is requested,  the provided is called and its provided
+     * object is returned
+     *
+     * @param type the interface
+     * @param provider   the lambda provider with Container as input and Object instance as output
+     * @return the builder instance
+     */
+    Builder registerTransient(Class<?> type, Function<Container, Object> provider);
 }
